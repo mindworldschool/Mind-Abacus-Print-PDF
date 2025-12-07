@@ -40,7 +40,7 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   const layout = document.createElement("div");
   layout.className = `mws-trainer mws-trainer--${displayMode}`;
 
-  // MAIN COLUMN
+  // MAIN COLUMN (пример + ответ)
   const trainerMain = document.createElement("div");
   trainerMain.className = `trainer-main trainer-main--${displayMode}`;
 
@@ -49,7 +49,7 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   exampleArea.className = "example-view";
   trainerMain.appendChild(exampleArea);
 
-  // ANSWER input
+  // Блок ответа прямо под примером
   const answerSection = document.createElement("div");
   answerSection.className = "answer-section-panel";
 
@@ -65,23 +65,25 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   const submitBtn = document.createElement("button");
   submitBtn.className = "btn btn--primary";
   submitBtn.id = "btn-submit";
-  submitBtn.textContent = t?.("trainer.submit") || "Ответить";
+  submitBtn.textContent =
+    t?.("trainer.submitButton") || "Ответить";
 
   answerSection.append(answerLabel, answerInput, submitBtn);
   trainerMain.appendChild(answerSection);
 
-  // SIDE PANEL
+  // ПРАВАЯ ПАНЕЛЬ
   const panelControls = document.createElement("div");
   panelControls.id = "panel-controls";
   panelControls.className = "panel-controls";
 
-  // --- Stats card
+  // --- Карточка Статистика
   const statsCard = document.createElement("div");
   statsCard.className = "panel-card panel-card--stats";
 
   const statsTitle = document.createElement("div");
   statsTitle.className = "panel-card__title";
-  statsTitle.textContent = t?.("trainer.stats.title") || "Статистика";
+  statsTitle.textContent =
+    t?.("trainer.stats.title") || "Статистика";
 
   const statsBody = document.createElement("div");
   statsBody.className = "panel-card__body panel-card__body--stats";
@@ -89,41 +91,50 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   const statTotal = document.createElement("div");
   statTotal.className = "stat-item";
   statTotal.innerHTML = `
-    <span class="stat-item__label">${t?.("trainer.stats.total") || "Всего:"}</span>
+    <span class="stat-item__label">${
+      t?.("trainer.stats.total") || "Всего:"
+    }</span>
     <span class="stat-item__value" id="stats-total">${exampleCount}</span>
   `;
 
   const statCompleted = document.createElement("div");
   statCompleted.className = "stat-item";
   statCompleted.innerHTML = `
-    <span class="stat-item__label">${t?.("trainer.stats.completed") || "Решено:"}</span>
+    <span class="stat-item__label">${
+      t?.("trainer.stats.completed") || "Решено:"
+    }</span>
     <span class="stat-item__value" id="stats-completed">0</span>
   `;
 
   const statCorrect = document.createElement("div");
   statCorrect.className = "stat-item";
   statCorrect.innerHTML = `
-    <span class="stat-item__label">${t?.("trainer.stats.correct") || "Правильно:"}</span>
+    <span class="stat-item__label">${
+      t?.("trainer.stats.correct") || "Правильно:"
+    }</span>
     <span class="stat-item__value stat-item__value--correct" id="stats-correct">0</span>
   `;
 
   const statIncorrect = document.createElement("div");
   statIncorrect.className = "stat-item";
   statIncorrect.innerHTML = `
-    <span class="stat-item__label">${t?.("trainer.stats.incorrect") || "Ошибки:"}</span>
+    <span class="stat-item__label">${
+      t?.("trainer.stats.incorrect") || "Ошибки:"
+    }</span>
     <span class="stat-item__value stat-item__value--incorrect" id="stats-incorrect">0</span>
   `;
 
   statsBody.append(statTotal, statCompleted, statCorrect, statIncorrect);
   statsCard.append(statsTitle, statsBody);
 
-  // --- Progress card
+  // --- Карточка Прогресс
   const progressCard = document.createElement("div");
   progressCard.className = "panel-card panel-card--progress";
 
   const progressTitle = document.createElement("div");
   progressTitle.className = "panel-card__title";
-  progressTitle.textContent = t?.("trainer.progress.title") || "Прогресс";
+  progressTitle.textContent =
+    t?.("trainer.progress.title") || "Прогресс";
 
   const progressBody = document.createElement("div");
   progressBody.className = "panel-card__body";
@@ -148,7 +159,8 @@ function createTrainerLayout(displayMode, exampleCount, t) {
 
   const correctLabel = document.createElement("span");
   correctLabel.className = "progress-label__correct";
-  correctLabel.textContent = t?.("trainer.correctLabel") || "Правильно: ";
+  correctLabel.textContent =
+    t?.("trainer.correctLabel") || "Правильно: ";
   const correctPercent = document.createElement("strong");
   correctPercent.id = "percent-correct";
   correctPercent.textContent = "0%";
@@ -156,7 +168,8 @@ function createTrainerLayout(displayMode, exampleCount, t) {
 
   const incorrectLabel = document.createElement("span");
   incorrectLabel.className = "progress-label__incorrect";
-  incorrectLabel.textContent = t?.("trainer.incorrectLabel") || "Ошибки: ";
+  incorrectLabel.textContent =
+    t?.("trainer.incorrectLabel") || "Ошибки: ";
   const incorrectPercent = document.createElement("strong");
   incorrectPercent.id = "percent-incorrect";
   incorrectPercent.textContent = "0%";
@@ -167,13 +180,14 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   progressBody.append(progressBar, labels);
   progressCard.append(progressTitle, progressBody);
 
-  // --- Timer card
+  // --- Карточка Таймер
   const timerCard = document.createElement("div");
   timerCard.className = "panel-card panel-card--timer";
 
   const timerTitle = document.createElement("div");
   timerTitle.className = "panel-card__title";
-  timerTitle.textContent = t?.("trainer.timer.title") || "Таймер";
+  timerTitle.textContent =
+    t?.("trainer.timer.title") || "Таймер";
 
   const timerBody = document.createElement("div");
   timerBody.className = "panel-card__body panel-card__body--timer";
@@ -191,32 +205,41 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   timerBody.append(timerContainer, timerText);
   timerCard.append(timerTitle, timerBody);
 
-  // --- Abacus toggle card
+  // --- Кнопка Абакус
   const abacusCard = document.createElement("div");
   abacusCard.className = "panel-card panel-card--compact";
 
   const abacusBtn = document.createElement("button");
   abacusBtn.className = "btn btn--secondary btn--fullwidth";
   abacusBtn.id = "btn-show-abacus";
-  abacusBtn.textContent = t?.("trainer.showAbacus") || "🧮 Показать абакус";
+  abacusBtn.textContent =
+    t?.("trainer.showAbacus") || "🧮 Показать абакус";
 
   abacusCard.appendChild(abacusBtn);
 
-  // --- Exit button card
+  // --- Кнопка Выход
   const exitCard = document.createElement("div");
   exitCard.className = "panel-card panel-card--compact";
 
   const exitBtn = document.createElement("button");
   exitBtn.id = "btn-exit-trainer";
-  exitBtn.className = "btn btn--secondary btn--fullwidth btn--danger";
-  exitBtn.textContent = t?.("trainer.exit") || "⏹ Выйти";
+  exitBtn.className =
+    "btn btn--secondary btn--fullwidth btn--danger";
+  exitBtn.textContent =
+    t?.("trainer.exitButton") || "⏹ Выйти";
 
   exitCard.appendChild(exitBtn);
 
-  // Assemble side panel
-  panelControls.append(statsCard, progressCard, timerCard, abacusCard, exitCard);
+  // Собираем правую панель
+  panelControls.append(
+    statsCard,
+    progressCard,
+    timerCard,
+    abacusCard,
+    exitCard
+  );
 
-  // Assemble layout
+  // Общий layout
   layout.append(trainerMain, panelControls);
 
   return layout;
@@ -785,3 +808,4 @@ function getExampleCount(examplesCfg) {
     ? DEFAULTS.EXAMPLES_COUNT
     : (examplesCfg.count ?? DEFAULTS.EXAMPLES_COUNT);
 }
+
