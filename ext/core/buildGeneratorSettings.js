@@ -1,19 +1,18 @@
 // ext/core/buildGeneratorSettings.js
-// Shared helper to build generator settings from global settings.
-// Used both by the interactive trainer and by worksheet/PDF generation.
+// Helper to build generator settings from global settings object.
+// Extracted from ext/trainer_logic.js so it can be reused by other modules
+// (e.g. worksheet / print).
 
 import { DEFAULTS } from "../../core/utils/constants.js";
 
 /**
- * Build generator configuration for the example generator
- * based on full settings object from the global state.
+ * Build configuration object for example generator based on
+ * full settings slice from global state.
  *
- * @param {Object} settings - The `settings` slice from global state.
+ * @param {Object} st - settings from state (state.settings)
  * @returns {Object} generatorSettings
  */
-export function buildGeneratorSettingsFromSettings(settings) {
-  const st = settings ?? {};
-
+export function buildGeneratorSettingsFromSettings(st = {}) {
   const actionsCfg = st.actions ?? {};
   const blockSimpleDigits = Array.isArray(st?.blocks?.simple?.digits)
     ? st.blocks.simple.digits
