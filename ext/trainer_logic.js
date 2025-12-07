@@ -14,9 +14,13 @@
 // 5. ✅ НОВОЕ: Добавлена остановка анимации (exampleView.stopAnimation()) при:
 //    - Переходе в настройки (кнопка "Выйти")
 //    - Завершении тренировки (finishTraining)
+//    - Начале нового примера (showNextExample)
+//
+// Всё остальное (session.mode, reviewQueue, renderResultsScreen и т.д.) мы
+// сохраняем для совместимости, но теперь они не ломают UX.
 
-import { Abacus } from "./components/Abacus.js";
 import { ExampleView } from "./components/ExampleView.js";
+import { Abacus } from "./components/AbacusNew.js";
 import { generateExample } from "./core/generator.js";
 import { buildGeneratorSettingsFromSettings } from "./core/buildGeneratorSettings.js";
 import { startAnswerTimer, stopAnswerTimer } from "../js/utils/timer.js";
@@ -44,6 +48,27 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   exampleArea.id = "area-example";
   exampleArea.className = "example-view";
   trainerMain.appendChild(exampleArea);
+
+  // ANSWER input
+  const answerSection = document.createElement("div");
+  answerSection.className = "answer-section-panel";
+
+  const answerLabel = document.createElement("div");
+  answerLabel.className = "answer-label";
+  answerLabel.textContent = t?.("trainer.answerLabel") || "Ответ:";
+
+  const answerInput = document.createElement("input");
+  answerInput.type = "number";
+  answerInput.id = "answer-input";
+  answerInput.placeholder = "";
+
+  const submitBtn = document.createElement("button");
+  submitBtn.className = "btn btn--primary";
+  submitBtn.id = "btn-submit";
+  submitBtn.textContent = t?.("trainer.submit") || "Ответить";
+
+  answerSection.append(answerLabel, answerInput, submitBtn);
+  trainerMain.appendChild(answerSection);
 
   // SIDE PANEL
   const panelControls = document.createElement("div");
@@ -92,7 +117,7 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   statsBody.append(statTotal, statCompleted, statCorrect, statIncorrect);
   statsCard.append(statsTitle, statsBody);
 
-  // --- Progress bar
+  // --- Progress card
   const progressCard = document.createElement("div");
   progressCard.className = "panel-card panel-card--progress";
 
@@ -222,85 +247,6 @@ function createAbacusWrapper() {
   return wrapper;
 }
 
-/* ---------------- Results screen ---------------- */
-
-function createResultsScreen({ t, session, onRetryErrors, onBackToSettings }) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "results-screen";
-
-  const titleEl = document.createElement("h2");
-  titleEl.className = "results-screen__title";
-  titleEl.textContent = t?.("results.title") || "Результаты сессии";
-
-  const descEl = document.createElement("p");
-  descEl.className = "results-screen__desc";
-  descEl.textContent =
-    t?.("results.subtitle") || "Краткая статистика по текущему заданию";
-
-  const statsEl = document.createElement("div");
-  statsEl.className = "results-screen__stats";
-
-  const totalEl = document.createElement("div");
-  totalEl.className = "results-stat results-stat--total";
-  totalEl.innerHTML = `
-    <span class="results-stat__label">${t?.("results.total") || "Всего примеров:"}</span>
-    <span class="results-stat__value">${session.stats.total}</span>
-  `;
-
-  const correctEl = document.createElement("div");
-  correctEl.className = "results-stat results-stat--correct";
-  correctEl.innerHTML = `
-    <span class="results-stat__label">${t?.("results.correct") || "Правильных ответов:"}</span>
-    <span class="results-stat__value results-stat__value--correct">${session.stats.correct}</span>
-  `;
-
-  const incorrectEl = document.createElement("div");
-  incorrectEl.className = "results-stat results-stat--incorrect";
-  incorrectEl.innerHTML = `
-    <span class="results-stat__label">${t?.("results.incorrect") || "Ошибок:"}</span>
-    <span class="results-stat__value results-stat__value--incorrect">${session.stats.incorrect}</span>
-  `;
-
-  statsEl.append(totalEl, correctEl, incorrectEl);
-
-  const actionsEl = document.createElement("div");
-  actionsEl.className = "results-screen__actions";
-
-  if (
-    session.incorrectExamples &&
-    session.incorrectExamples.length > 0 &&
-    session.stats.incorrect > 0
-  ) {
-    const retryBtn = document.createElement("button");
-    retryBtn.className = "btn btn--primary";
-    retryBtn.id = "btn-retry-errors";
-    retryBtn.textContent =
-      t?.("results.retryErrors") || "Исправить ошибки";
-
-    retryBtn.addEventListener("click", () => {
-      onRetryErrors?.();
-    });
-
-    actionsEl.appendChild(retryBtn);
-  }
-
-  const backBtn = document.createElement("button");
-  backBtn.className = "btn btn--secondary";
-  backBtn.id = "btn-results-back";
-  backBtn.textContent =
-    t?.("results.cta") || "Запустить новое задание";
-
-  backBtn.addEventListener("click", () => {
-    onBackToSettings?.();
-  });
-
-  actionsEl.appendChild(backBtn);
-
-  wrapper.append(titleEl, descEl, statsEl, actionsEl);
-
-  return wrapper;
-}
-
 /* ---------------- Trainer mounting ---------------- */
 
 export function mountTrainerUI(container, {
@@ -329,15 +275,12 @@ export function mountTrainerUI(container, {
     const isRetryStartup =
       retryMode?.enabled && Array.isArray(retryMode.examples);
 
-    // базовое количество примеров из настроек (основная серия)
     const baseExampleCount = getExampleCount(examplesCfg);
 
-    // сколько примеров реально решаем в этой сессии:
     const totalForThisRun = isRetryStartup
       ? retryMode.examples.length
       : baseExampleCount;
 
-    // === состояние сессии
     const session = {
       currentExample: null,
 
@@ -348,31 +291,23 @@ export function mountTrainerUI(container, {
       },
 
       completed: 0,
-
-      // массив неправильных ответов этой сессии
       incorrectExamples: [],
-
-      // очередь для режима "Исправить ошибки"
       reviewQueue: isRetryStartup
         ? retryMode.examples.map((e) => ({
             ...e,
-            // на всякий случай нормализуем поля
             question: e.question,
             correctAnswer: e.correctAnswer,
             userAnswer: e.userAnswer,
             answer: e.answer
           }))
         : [],
-
       reviewIndex: 0
     };
 
-    // === DOM тренажёра
     const layout = createTrainerLayout(displayMode, totalForThisRun, t);
     container.innerHTML = "";
     container.appendChild(layout);
 
-    // Abacus wrapper
     const oldAbacus = document.getElementById("abacus-wrapper");
     if (oldAbacus) oldAbacus.remove();
 
@@ -382,10 +317,11 @@ export function mountTrainerUI(container, {
     const exampleView = new ExampleView(
       document.getElementById("area-example")
     );
+    exampleView.setDisplayMode(displayMode);
 
     const abacus = new Abacus(
       document.getElementById("floating-abacus-container"),
-      { digitCount: abacusColumns }  // ✅ Передаём объект с digitCount
+      { digitCount: abacusColumns }
     );
 
     const overlayColor =
@@ -409,8 +345,6 @@ export function mountTrainerUI(container, {
 
     let isShowing = false;
     let showAbort = false;
-
-    /* ---------------- helpers ---------- */
 
     function adaptExampleFontSize(actionsCount, maxDigitsInOneStep) {
       const exampleLines = document.querySelectorAll(
@@ -439,26 +373,30 @@ export function mountTrainerUI(container, {
       });
     }
 
+    function buildGeneratorSettings() {
+      // Wrapper that delegates to shared helper in ext/core/buildGeneratorSettings.js
+      // Uses current settings object `st` from mountTrainerUI scope.
+      return buildGeneratorSettingsFromSettings(st);
+    }
+
     function delay(ms) {
       return new Promise((r) => setTimeout(r, ms));
     }
 
     function formatStep(step) {
-      // шаги у нас уже со знаком "+3"/"-2"
       return String(step);
     }
 
     async function playSequential(
       steps,
       intervalMs,
-      { beepOnStep } = {}
+      { beepOnStep = false } = {}
     ) {
-      if (!steps || !steps.length) return;
-
       try {
         for (let i = 0; i < steps.length; i++) {
-          const step = steps[i];
-          const stepStr = formatStep(step);
+          if (showAbort) break;
+
+          const stepStr = formatStep(steps[i]);
           const isOdd = i % 2 === 0;
           const color = isOdd ? "#EC8D00" : "#6db45c";
 
@@ -510,7 +448,6 @@ export function mountTrainerUI(container, {
     }
 
     function getNextExample() {
-      // режим "исправить ошибки"
       if (session.reviewQueue.length > 0) {
         if (session.reviewIndex >= session.reviewQueue.length) {
           finishTraining();
@@ -519,52 +456,83 @@ export function mountTrainerUI(container, {
         return session.reviewQueue[session.reviewIndex];
       }
 
-      // обычный режим main: генерируем новый пример
-      return generateExample(buildGeneratorSettingsFromSettings(st));
+      return generateExample(buildGeneratorSettings());
     }
 
     async function showNextExample() {
-      // ✅ ИСПРАВЛЕНИЕ 1: Останавливаем анимацию перед новым примером
       exampleView.stopAnimation();
+      overlay.clear();
       showAbort = true;
       isShowing = false;
-      overlay.clear();
-      stopAnswerTimer();
 
-      const input = document.getElementById("answerInput");
-      if (input) {
-        input.value = "";
+      if (session.completed >= session.stats.total) {
+        finishTraining();
+        return;
       }
 
       const ex = getNextExample();
-      if (!ex) return;
+      if (!ex || !Array.isArray(ex.steps)) {
+        logger.error(CONTEXT, "Некорректный пример:", ex);
+        toast.error(
+          t?.("errors.invalidExample") ||
+            "Не удалось сгенерировать пример. Попробуйте ещё раз."
+        );
+        finishTraining();
+        return;
+      }
 
       session.currentExample = ex;
 
-      exampleView.renderExample(ex);
+      const steps = ex.steps || [];
+      const actionsLen = steps.length;
 
-      adaptExampleFontSize(ex.actionsCount, ex.maxDigitsInOneStep);
-
-      const inputEl = document.getElementById("answerInput");
-      const showSpeedActive =
-        typeof ex.showSpeed === "number" && ex.showSpeed > 0;
-      const lockDuringShow =
-        ex.lockInputDuringShow === true;
-      const shouldUseDictation =
-        st.toggles?.dictation === true && ex.canUseDictation;
-
-      if (inputEl) {
-        inputEl.disabled = lockDuringShow && (showSpeedActive || shouldUseDictation);
+      let maxDigitsInStep = 1;
+      for (const step of steps) {
+        const numericPart = String(step).replace(/[^\d-]/g, "");
+        const num = parseInt(numericPart, 10);
+        if (!isNaN(num)) {
+          const lenAbs = Math.abs(num).toString().length;
+          if (lenAbs > maxDigitsInStep) {
+            maxDigitsInStep = lenAbs;
+          }
+        }
       }
 
-      const displaySteps = ex.displaySteps || ex.steps;
+      const input = document.getElementById("answer-input");
+      if (input) input.value = "";
+
+      const shouldUseDictation = actionsLen > 12;
+      const effectiveShowSpeed = shouldUseDictation
+        ? 2000
+        : (st.showSpeedMs || 0);
+      const showSpeedActive =
+        st.showSpeedEnabled && effectiveShowSpeed > 0;
+
+      const displaySteps = ex.steps.map(step => {
+        if (typeof step === "string") return step;
+        if (step.step) return step.step;
+        return String(step);
+      });
+
+      if (showSpeedActive || shouldUseDictation) {
+        const area = document.getElementById("area-example");
+        if (area) area.innerHTML = "";
+      } else {
+        exampleView.render(displaySteps, displayMode);
+        requestAnimationFrame(() => {
+          adaptExampleFontSize(actionsLen, maxDigitsInStep);
+        });
+      }
+
+      const lockDuringShow = st.lockInputDuringShow !== false;
+      if (input) input.disabled = lockDuringShow;
 
       if (showSpeedActive || shouldUseDictation) {
         isShowing = true;
         showAbort = false;
         await playSequential(
           displaySteps,
-          ex.showSpeedMs ?? UI.PAUSE_AFTER_CHAIN_MS,
+          effectiveShowSpeed,
           { beepOnStep: !!st.beepOnStep }
         );
         if (showAbort) return;
@@ -573,14 +541,14 @@ export function mountTrainerUI(container, {
             UI.PAUSE_AFTER_CHAIN_MS
         );
         isShowing = false;
-        if (lockDuringShow && inputEl) {
-          inputEl.disabled = false;
-          inputEl.focus();
+        if (lockDuringShow && input) {
+          input.disabled = false;
+          input.focus();
         }
       } else {
-        if (inputEl) {
-          inputEl.disabled = false;
-          inputEl.focus();
+        if (input) {
+          input.disabled = false;
+          input.focus();
         }
       }
 
@@ -589,24 +557,31 @@ export function mountTrainerUI(container, {
         "Next example:",
         ex.steps,
         "Correct answer:",
-        ex.correctAnswer
+        ex.answer,
+        "mode:",
+        session.mode
       );
-
-      if (st.perExampleTimerEnabled && st.perExampleTimeMs > 0) {
-        startAnswerTimer(st.perExampleTimeMs, {
-          onExpire: () => handleTimeExpired(),
-          textElementId: "answerTimerText",
-          barSelector: "#answer-timer .bar"
-        });
-      }
     }
 
-    function handleAnswer(userAnswerRaw) {
+    function checkAnswer() {
+      const input = document.getElementById("answer-input");
+      if (!input) return;
+
+      if (isShowing && st.lockInputDuringShow !== false) return;
+
+      const userAnswer = parseInt(input.value ?? "", 10);
+      if (Number.isNaN(userAnswer)) {
+        toast.info(
+          t?.("trainer.enterAnswer") || "Введите ответ, пожалуйста."
+        );
+        input.focus();
+        return;
+      }
+
       const ex = session.currentExample;
       if (!ex) return;
 
-      const userAnswer = String(userAnswerRaw).trim();
-      const isCorrect = userAnswer === String(ex.correctAnswer);
+      const isCorrect = userAnswer === ex.answer;
 
       session.completed += 1;
 
@@ -623,6 +598,10 @@ export function mountTrainerUI(container, {
       }
 
       updateStatsUI();
+
+      if (session.reviewQueue.length > 0) {
+        session.reviewIndex += 1;
+      }
 
       if (session.completed >= session.stats.total) {
         finishTraining();
@@ -654,9 +633,7 @@ export function mountTrainerUI(container, {
     }
 
     function finishTraining() {
-      // ✅ ИСПРАВЛЕНИЕ 2: Останавливаем анимацию при завершении
       exampleView.stopAnimation();
-
       stopAnswerTimer();
       showAbort = true;
       isShowing = false;
@@ -688,20 +665,28 @@ export function mountTrainerUI(container, {
     }
 
     function attachListeners() {
-      const input = document.getElementById("answerInput");
+      const input = document.getElementById("answer-input");
       const btnShowAbacus =
         document.getElementById("btn-show-abacus");
       const btnExitTrainer =
         document.getElementById("btn-exit-trainer");
       const abacusCloseBtn =
         document.getElementById("abacus-close");
+      const btnSubmit =
+        document.getElementById("btn-submit");
 
       if (input) {
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            handleAnswer(input.value);
+            checkAnswer();
           }
+        });
+      }
+
+      if (btnSubmit) {
+        btnSubmit.addEventListener("click", () => {
+          checkAnswer();
         });
       }
 
