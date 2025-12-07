@@ -195,7 +195,20 @@ export const dictionaries = {
       "cta": "Start new setup",
       "retryErrors": "Retry errors"
     },
-    "trainer": {
+        "trainer": {
+      "stats": {
+        "title": "Statistics",
+        "total": "Total:",
+        "completed": "Completed:",
+        "correct": "Correct:",
+        "incorrect": "Mistakes:"
+      },
+      "progress": {
+        "title": "Progress"
+      },
+      "timer": {
+        "title": "Timer"
+      },
       "answerLabel": "Answer:",
       "submitButton": "Submit",
       "showAbacus": "🧮 Show Abacus",
@@ -203,7 +216,8 @@ export const dictionaries = {
       "pleaseEnterNumber": "Please enter a number",
       "correctLabel": "Correct: ",
       "incorrectLabel": "Mistakes: ",
-      "exitButton": "⏹ Exit"
+      "exitButton": "⏹ Exit",
+      "enterAnswer": "Please enter your answer"
     }
   },
 
@@ -402,15 +416,29 @@ export const dictionaries = {
       "cta": "Iniciar nueva configuración",
       "retryErrors": "Corregir errores"
     },
-    "trainer": {
+        "trainer": {
+      "stats": {
+        "title": "Estadísticas",
+        "total": "Total:",
+        "completed": "Resueltos:",
+        "correct": "Correctas:",
+        "incorrect": "Errores:"
+      },
+      "progress": {
+        "title": "Progreso"
+      },
+      "timer": {
+        "title": "Temporizador"
+      },
       "answerLabel": "Respuesta:",
       "submitButton": "Enviar",
-      "showAbacus": "🧮 Mostrar Ábaco",
-      "hideAbacus": "🧮 Ocultar Ábaco",
-      "pleaseEnterNumber": "Por favor ingrese un número",
-      "correctLabel": "Correctos: ",
+      "showAbacus": "🧮 Mostrar ábaco",
+      "hideAbacus": "🧮 Ocultar ábaco",
+      "pleaseEnterNumber": "Por favor, introduce un número",
+      "correctLabel": "Correctas: ",
       "incorrectLabel": "Errores: ",
-      "exitButton": "⏹ Salir"
+      "exitButton": "⏹ Salir",
+      "enterAnswer": "Por favor, introduce la respuesta"
     }
   },
 
@@ -609,7 +637,20 @@ export const dictionaries = {
       "cta": "Запустить новое задание",
       "retryErrors": "Исправить ошибки"
     },
-    "trainer": {
+       "trainer": {
+      "stats": {
+        "title": "Статистика",
+        "total": "Всего:",
+        "completed": "Решено:",
+        "correct": "Правильно:",
+        "incorrect": "Ошибки:"
+      },
+      "progress": {
+        "title": "Прогресс"
+      },
+      "timer": {
+        "title": "Таймер"
+      },
       "answerLabel": "Ответ:",
       "submitButton": "Ответить",
       "showAbacus": "🧮 Показать абакус",
@@ -617,7 +658,8 @@ export const dictionaries = {
       "pleaseEnterNumber": "Пожалуйста, введите число",
       "correctLabel": "Правильно: ",
       "incorrectLabel": "Ошибки: ",
-      "exitButton": "⏹ Выйти"
+      "exitButton": "⏹ Выйти",
+      "enterAnswer": "Введите ответ, пожалуйста"
     }
   },
 
@@ -816,7 +858,20 @@ export const dictionaries = {
       "cta": "Почати нове налаштування",
       "retryErrors": "Виправити помилки"
     },
-    "trainer": {
+        "trainer": {
+      "stats": {
+        "title": "Статистика",
+        "total": "Усього:",
+        "completed": "Вирішено:",
+        "correct": "Правильно:",
+        "incorrect": "Помилки:"
+      },
+      "progress": {
+        "title": "Прогрес"
+      },
+      "timer": {
+        "title": "Таймер"
+      },
       "answerLabel": "Відповідь:",
       "submitButton": "Відповісти",
       "showAbacus": "🧮 Показати абакус",
@@ -824,7 +879,8 @@ export const dictionaries = {
       "pleaseEnterNumber": "Будь ласка, введіть число",
       "correctLabel": "Правильно: ",
       "incorrectLabel": "Помилки: ",
-      "exitButton": "⏹ Вийти"
+      "exitButton": "⏹ Вийти",
+      "enterAnswer": "Будь ласка, введіть відповідь"
     }
   }
 };
