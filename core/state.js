@@ -72,6 +72,12 @@ const defaultState = {
     success: 0,
     total: 0,
     wrongExamples: [] // Массив неправильно решенных примеров
+  },
+  worksheet: {
+    examples: [],
+    showAnswers: false,
+    settingsSnapshot: null,
+    createdAt: null
   }
 };
 
@@ -115,6 +121,10 @@ export function setResults(results) {
 
 export function resetResults() {
   _resetResults();
+}
+
+export function setWorksheet(worksheet) {
+  setState({ worksheet }, false);
 }
 
 // Export new functionality for modern usage
