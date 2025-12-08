@@ -107,7 +107,7 @@ export function renderConfirmation(container, { t, state, navigate }) {
     label: t("confirmation.printButton"),
     variant: "secondary",
     onClick: () => {
-      const settings = state.settings;
+      const settings = state.settings || {};
 
       // Берём количество примеров для печати:
       const rawExamplesCount =
@@ -115,18 +115,24 @@ export function renderConfirmation(container, { t, state, navigate }) {
         (settings.examples && settings.examples.count) ??
         10;
 
-      const examplesCount = Number(rawExamplesCount) > 0 ? Number(rawExamplesCount) : 10;
-      const showAnswers = !!(settings.print && settings.print.showAnswers);
+      const rawNumber = Number(rawExamplesCount);
+      const examplesCount =
+        Number.isFinite(rawNumber) && rawNumber > 0 ? rawNumber : 10;
+
+      // Нужен ли лист с ответами — берём из settings.print.showAnswers, иначе по умолчанию true
+      const showAnswers =
+        settings.print && typeof settings.print.showAnswers === "boolean"
+          ? settings.print.showAnswers
+          : true;
 
       const worksheet = generateWorksheet({
-        settings,
-        examplesCount
+        examplesCount,
+        showAnswers
       });
 
-      openWorksheetPrintWindow(worksheet, {
-        includeAnswers: showAnswers,
-        lang: state.language || "ru"
-      });
+      if (worksheet) {
+        openWorksheetPrintWindow(worksheet, { autoPrint: true });
+      }
     }
   });
 
