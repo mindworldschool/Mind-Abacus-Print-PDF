@@ -14,6 +14,24 @@ export const dictionaries = {
       }
     },
     "footer": "MindWorld School © 2025",
+     "printSheet": {
+      "title": "Abacus Worksheet",
+      "subtitle": "Practice examples",
+      "answersTitle": "Abacus Worksheet — Answers",
+      "answersSubtitle": "For teacher",
+      "metaExamples": "Examples:",
+      "metaGenerated": "Generated:",
+      "fieldName": "Name:",
+      "fieldDate": "Date:",
+      "fieldGroup": "Group:",
+      "fieldLevel": "Level:",
+      "startLabel": "Start:",
+      "stepsLabel": "Steps:",
+      "answer1Label": "Answer 1:",
+      "answer2Label": "Answer 2:",
+      "emptyWorksheet": "Worksheet is empty. Please generate examples first.",
+      "popupBlocked": "Unable to open print window. Please allow pop-ups in your browser."
+    },
     "buttons": {
       "back": "Back",
       "continue": "Continue",
@@ -242,6 +260,24 @@ export const dictionaries = {
       }
     },
     "footer": "MindWorld School © 2025",
+    "printSheet": {
+      "title": "Hoja de ejercicios de ábaco",
+      "subtitle": "Ejemplos de práctica",
+      "answersTitle": "Hoja de respuestas de ábaco",
+      "answersSubtitle": "Para el profesor",
+      "metaExamples": "Ejemplos:",
+      "metaGenerated": "Generado:",
+      "fieldName": "Nombre:",
+      "fieldDate": "Fecha:",
+      "fieldGroup": "Grupo:",
+      "fieldLevel": "Nivel:",
+      "startLabel": "Inicio:",
+      "stepsLabel": "Pasos:",
+      "answer1Label": "Respuesta 1:",
+      "answer2Label": "Respuesta 2:",
+      "emptyWorksheet": "La hoja de ejercicios está vacía. Primero genera los ejemplos.",
+      "popupBlocked": "No se pudo abrir la ventana de impresión. Permite las ventanas emergentes en el navegador."
+    },
     "buttons": {
       "back": "Atrás",
       "continue": "Continuar",
@@ -470,6 +506,24 @@ export const dictionaries = {
       }
     },
     "footer": "MindWorld School © 2025",
+    "printSheet": {
+      "title": "Лист заданий на абакусе",
+      "subtitle": "Примеры для тренировки",
+      "answersTitle": "Лист ответов на абакусе",
+      "answersSubtitle": "Для преподавателя",
+      "metaExamples": "Примеров:",
+      "metaGenerated": "Сгенерировано:",
+      "fieldName": "Имя:",
+      "fieldDate": "Дата:",
+      "fieldGroup": "Группа:",
+      "fieldLevel": "Уровень:",
+      "startLabel": "Старт:",
+      "stepsLabel": "Шаги:",
+      "answer1Label": "Ответ 1:",
+      "answer2Label": "Ответ 2:",
+      "emptyWorksheet": "Лист заданий пуст. Сначала сгенерируйте примеры.",
+      "popupBlocked": "Не удалось открыть окно печати. Разрешите всплывающие окна в браузере."
+    },
     "buttons": {
       "back": "Назад",
       "continue": "Продолжить",
@@ -698,6 +752,24 @@ export const dictionaries = {
       }
     },
     "footer": "MindWorld School © 2025",
+     "printSheet": {
+      "title": "Аркуш вправ на абакусі",
+      "subtitle": "Приклади для тренування",
+      "answersTitle": "Аркуш відповідей на абакусі",
+      "answersSubtitle": "Для викладача",
+      "metaExamples": "Прикладів:",
+      "metaGenerated": "Згенеровано:",
+      "fieldName": "Ім'я:",
+      "fieldDate": "Дата:",
+      "fieldGroup": "Група:",
+      "fieldLevel": "Рівень:",
+      "startLabel": "Старт:",
+      "stepsLabel": "Кроки:",
+      "answer1Label": "Відповідь 1:",
+      "answer2Label": "Відповідь 2:",
+      "emptyWorksheet": "Аркуш завдань порожній. Спочатку згенеруйте приклади.",
+      "popupBlocked": "Не вдалося відкрити вікно друку. Дозвольте спливаючі вікна у браузері."
+    },
     "buttons": {
       "back": "Назад",
       "continue": "Продовжити",
