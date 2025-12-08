@@ -160,7 +160,8 @@ export const dictionaries = {
         "time": "Time limit",
         "speed": "Display speed",
         "transition": "Carry over",
-        "inline": "Inline example"
+        "inline": "Inline example",
+        "printButton": "Print worksheets"
       },
       "boolean": {
         "yes": "Yes",
@@ -387,7 +388,8 @@ export const dictionaries = {
         "time": "Límite de tiempo",
         "speed": "Velocidad",
         "transition": "Cruce sobre",
-        "inline": "Ejemplo en línea"
+        "inline": "Ejemplo en línea",
+        "printButton": "Imprimir tareas"
       },
       "boolean": {
         "yes": "Sí",
@@ -614,7 +616,8 @@ export const dictionaries = {
         "time": "Ограничение времени",
         "speed": "Скорость показа",
         "transition": "Переход через",
-        "inline": "Пример в строку"
+        "inline": "Пример в строку",
+        "printButton": "Распечатать задания"
       },
       "boolean": {
         "yes": "Да",
@@ -841,7 +844,8 @@ export const dictionaries = {
         "time": "Обмеження часу",
         "speed": "Швидкість показу",
         "transition": "Перехід через",
-        "inline": "Приклад у рядок"
+        "inline": "Приклад у рядок",
+       "printButton": "Роздрукувати завдання" 
       },
       "boolean": {
         "yes": "Так",
