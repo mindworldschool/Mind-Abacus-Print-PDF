@@ -1,33 +1,34 @@
 // ext/print/worksheetPrintWindow.js
 //
 // Открывает новое окно с разметкой листа примеров для печати.
-// Использует данные из ext/print/worksheetGenerator.js → getCurrentWorksheet().
+// Принимает на вход объект worksheet, который возвращает
+// ext/print/worksheetGenerator.js → generateWorksheet(...) .
 //
 // Структура на листе:
 //   - сетка из "карточек-примеров" (автоматически по ширине листа);
 //   - в каждой карточке:
 //       1) номер примера,
-//       2) стартовое число (по желанию – можно убрать),
-//       3) операции столбиком,
+//       2) стартовое число,
+//       3) операции столбиком (в одну строку),
 //       4) пустая ячейка для ответа,
 //       5) ещё одна пустая ячейка для ответа.
 //   - при showAnswers = true добавляем вторую страницу с ответами.
-//
-
-import { getCurrentWorksheet } from "./worksheetGenerator.js";
 
 /**
  * Открыть окно с листом примеров для печати.
  *
+ * @param {Object} worksheet              - объект, возвращаемый generateWorksheet(...)
  * @param {Object} [options]
  * @param {boolean} [options.autoPrint=true]  - сразу вызвать print() после загрузки
  */
-export function openWorksheetPrintWindow(options = {}) {
+export function openWorksheetPrintWindow(worksheet, options = {}) {
   const { autoPrint = true } = options;
 
-  const worksheet = getCurrentWorksheet();
-
-  if (!worksheet || !Array.isArray(worksheet.examples) || worksheet.examples.length === 0) {
+  if (
+    !worksheet ||
+    !Array.isArray(worksheet.examples) ||
+    worksheet.examples.length === 0
+  ) {
     alert("Лист примеров пустой. Сначала сгенерируйте примеры.");
     return;
   }
@@ -40,7 +41,6 @@ export function openWorksheetPrintWindow(options = {}) {
   }
 
   const { examples, showAnswers, createdAt } = worksheet;
-
   const doc = printWindow.document;
 
   // --- Базовый HTML-каркас
@@ -290,9 +290,7 @@ export function openWorksheetPrintWindow(options = {}) {
               ${stepsFormatted
                 .map(
                   (s) =>
-                    `<span class="example-card__step">${escapeHtml(
-                      s
-                    )}</span>`
+                    `<span class="example-card__step">${escapeHtml(s)}</span>`
                 )
                 .join(" ")}
             </div>
@@ -363,10 +361,8 @@ export function openWorksheetPrintWindow(options = {}) {
 `);
   doc.close();
 
-  // Небольшая задержка, чтобы браузер успел отрисовать, затем auto-print
   if (autoPrint) {
     printWindow.focus();
-    // Используем setTimeout, чтобы избежать бага с пустой страницей в некоторых браузерах
     printWindow.setTimeout(() => {
       printWindow.print();
     }, 100);
@@ -413,7 +409,7 @@ function formatDate(isoString) {
     const minutes = pad(d.getMinutes());
 
     return `${year}-${month}-${day} ${hours}:${minutes}`;
-  } catch (e) {
+  } catch {
     return "-";
   }
 }
