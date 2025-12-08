@@ -69,6 +69,8 @@ export function generateWorksheet(options = {}) {
     showAnswers: Boolean(showAnswers)
   };
 
+  setWorksheet(worksheet);
+  
   return worksheet;
 }
 
