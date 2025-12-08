@@ -4,11 +4,14 @@
 // Использует данные из ext/print/worksheetGenerator.js → getCurrentWorksheet().
 //
 // Структура на листе:
-//   - сетка из "карточек-примеров" (автоматически по ширине листа);
+//   - шапка с логотипом и полями Name / Date / Group / Level;
+//   - рамка по периметру страницы;
+//   - сетка из 5 колонок с "карточками-примерами";
 //   - в каждой карточке:
 //       1) номер примера,
-//       2) шаги в столбик,
-//       3) две пустые строки для ответов.
+//       2) стартовое число,
+//       3) операции столбиком,
+//       4) две строки для ответа;
 //   - при showAnswers = true добавляем вторую страницу с ответами.
 //
 
@@ -46,12 +49,12 @@ export function openWorksheetPrintWindow(options = {}) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mind Abacus – Worksheet</title>
+  <title>Abacus Worksheet</title>
   <style>
     /* Параметры страницы для PDF-печати */
     @page {
       size: A4 portrait;
-      margin: 15mm;
+      margin: 10mm;
     }
 
     * {
@@ -70,7 +73,13 @@ export function openWorksheetPrintWindow(options = {}) {
 
     .page {
       width: 100%;
+      min-height: calc(100vh - 20mm);
       page-break-after: always;
+
+      /* Рамка по периметру листа */
+      border: 2px solid #B68E6B;
+      border-radius: 8px;
+      padding: 10mm 8mm;
     }
 
     .page:last-child {
@@ -82,30 +91,70 @@ export function openWorksheetPrintWindow(options = {}) {
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 8mm;
-      border-bottom: 1px solid #ddd;
       padding-bottom: 4mm;
+      border-bottom: 1px solid #d8c4aa;
+    }
+
+    .page-header__left {
+      display: flex;
+      flex-direction: column;
+      gap: 3mm;
+      max-width: 60%;
+    }
+
+    .page-header__logo {
+      font-weight: 700;
+      font-size: 13pt;
+      color: #B68E6B; /* тёплое золото под бренд */
+      letter-spacing: 0.03em;
     }
 
     .page-header__title {
+      display: flex;
+      flex-direction: column;
+      gap: 1mm;
+    }
+
+    .page-title-main {
       font-size: 14pt;
       font-weight: 600;
     }
 
-    .page-header__meta {
-      font-size: 9pt;
-      color: #666;
-      text-align: right;
-    }
-
-    .page-title-main {
-      display: block;
-      margin-bottom: 2mm;
-    }
-
     .page-title-sub {
-      display: block;
       font-size: 9pt;
       color: #666;
+    }
+
+    .page-header__fields {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2mm;
+      font-size: 9pt;
+      min-width: 90mm;
+      margin-left: 6mm;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2mm;
+      align-items: center;
+    }
+
+    .field-label {
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .field-line {
+      border-bottom: 1px solid #999;
+      height: 5mm;
+    }
+
+    .page-header__meta {
+      margin-top: 3mm;
+      font-size: 8pt;
+      color: #777;
     }
 
     .meta-row {
@@ -121,30 +170,31 @@ export function openWorksheetPrintWindow(options = {}) {
       font-size: 8pt;
     }
 
+    /* Сетка примеров: фиксированно 5 колонок */
     .worksheet-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 6mm 6mm;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5mm 4mm;
       width: 100%;
     }
 
     .example-card {
-      border: 1px solid #ccc;
+      border: 1px solid #d5c2a3;
       border-radius: 4px;
-      padding: 4mm 3mm;
-      min-height: 42mm;
+      padding: 3mm 2.5mm;
+      min-height: 36mm;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      font-size: 10pt;
+      font-size: 9.5pt;
     }
 
     .example-card__header {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 2mm;
-      border-bottom: 1px solid #eee;
+      margin-bottom: 1.5mm;
+      border-bottom: 1px solid #eee0cf;
       padding-bottom: 1mm;
     }
 
@@ -152,46 +202,56 @@ export function openWorksheetPrintWindow(options = {}) {
       font-weight: 600;
     }
 
+    .example-card__start {
+      font-size: 8.5pt;
+      color: #555;
+    }
+
     .example-card__steps {
-      margin: 2mm 0 3mm;
-      flex: 1;
+      margin: 1.5mm 0 1.5mm;
+      min-height: 15mm;
+      border-bottom: 1px dashed #ddcbb2;
+      padding-bottom: 1.5mm;
     }
 
-    .steps-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .steps-list__item {
+    .example-card__steps-row {
       display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      font-family: "Fira Code", "Consolas", monospace;
-      font-size: 10pt;
+      justify-content: flex-start;
+      align-items: baseline;
+      gap: 2mm;
       line-height: 1.2;
-      border-bottom: 1px dotted #ddd;
-      padding: 1px 0;
+    }
+
+    .example-card__steps-label {
+      font-size: 8pt;
+      color: #777;
+      margin-right: 2mm;
+      white-space: nowrap;
+    }
+
+    .example-card__step {
+      font-family: "Fira Code", "Consolas", monospace;
+      font-size: 9.5pt;
     }
 
     .example-card__answer-block {
-      margin-top: 1mm;
+      margin-top: 1.5mm;
       display: flex;
       flex-direction: column;
-      gap: 1.5mm;
+      gap: 1.2mm;
     }
 
     .answer-line {
-      border: 1px solid #bbb;
+      border: 1px solid #c0b29c;
       border-radius: 3px;
-      height: 8mm;
+      height: 7mm;
       display: flex;
       align-items: center;
-      padding: 0 2mm;
+      padding: 0 1.5mm;
     }
 
     .answer-line__label {
-      font-size: 8pt;
+      font-size: 7.5pt;
       color: #777;
       margin-right: 2mm;
       white-space: nowrap;
@@ -200,7 +260,7 @@ export function openWorksheetPrintWindow(options = {}) {
     .answer-line__field {
       border-bottom: 1px dashed #999;
       flex: 1;
-      height: 5mm;
+      height: 4mm;
     }
 
     .page-break {
@@ -210,9 +270,10 @@ export function openWorksheetPrintWindow(options = {}) {
     /* Лист с ответами */
     .answers-list {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 3mm 8mm;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3mm 4mm;
       font-size: 10pt;
+      margin-top: 4mm;
     }
 
     .answers-item {
@@ -243,18 +304,40 @@ export function openWorksheetPrintWindow(options = {}) {
   // --- Первая страница: примеры
   doc.write(`<div class="page">
     <div class="page-header">
-      <div class="page-header__title">
-        <span class="page-title-main">Mind Abacus – Worksheet</span>
-        <span class="page-title-sub">Practice sheet</span>
-      </div>
-      <div class="page-header__meta">
-        <div class="meta-row">
-          <span class="meta-label">Examples:&nbsp;</span>
-          <span class="meta-value">${examples.length}</span>
+      <div class="page-header__left">
+        <div class="page-header__logo">MindWorld School</div>
+        <div class="page-header__title">
+          <span class="page-title-main">Abacus Worksheet</span>
+          <span class="page-title-sub">Practice examples</span>
         </div>
-        <div class="meta-row">
-          <span class="meta-label">Generated:&nbsp;</span>
-          <span class="meta-value">${createdAt ? formatDate(createdAt) : "-"}</span>
+        <div class="page-header__meta">
+          <div class="meta-row">
+            <span class="meta-label">Examples:&nbsp;</span>
+            <span class="meta-value">${examples.length}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Generated:&nbsp;</span>
+            <span class="meta-value">${createdAt ? formatDate(createdAt) : "-"}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-header__fields">
+        <div class="field-row">
+          <span class="field-label">Name:</span>
+          <span class="field-line"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Date:</span>
+          <span class="field-line"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Group:</span>
+          <span class="field-line"></span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Level:</span>
+          <span class="field-line"></span>
         </div>
       </div>
     </div>
@@ -269,28 +352,32 @@ export function openWorksheetPrintWindow(options = {}) {
       <div class="example-card">
         <div class="example-card__header">
           <div class="example-card__number">№ ${ex.index}</div>
+          <div class="example-card__start">Start: ${safeNumber(ex.start)}</div>
         </div>
 
         <div class="example-card__steps">
-          <ul class="steps-list">
-            ${
-              stepsFormatted
+          <div class="example-card__steps-row">
+            <div class="example-card__steps-label">Steps:</div>
+            <div>
+              ${stepsFormatted
                 .map(
                   (s) =>
-                    `<li class="steps-list__item">${escapeHtml(s)}</li>`
+                    `<span class="example-card__step">${escapeHtml(
+                      s
+                    )}</span>`
                 )
-                .join("")
-            }
-          </ul>
+                .join(" ")}
+            </div>
+          </div>
         </div>
 
         <div class="example-card__answer-block">
           <div class="answer-line">
-            <span class="answer-line__label">1)</span>
+            <span class="answer-line__label">Answer 1:</span>
             <span class="answer-line__field"></span>
           </div>
           <div class="answer-line">
-            <span class="answer-line__label">2)</span>
+            <span class="answer-line__label">Answer 2:</span>
             <span class="answer-line__field"></span>
           </div>
         </div>
@@ -308,18 +395,40 @@ export function openWorksheetPrintWindow(options = {}) {
     doc.write(`
       <div class="page page-break">
         <div class="page-header">
-          <div class="page-header__title">
-            <span class="page-title-main">Mind Abacus – Answers</span>
-            <span class="page-title-sub">For teacher</span>
-          </div>
-          <div class="page-header__meta">
-            <div class="meta-row">
-              <span class="meta-label">Examples:&nbsp;</span>
-              <span class="meta-value">${examples.length}</span>
+          <div class="page-header__left">
+            <div class="page-header__logo">MindWorld School</div>
+            <div class="page-header__title">
+              <span class="page-title-main">Abacus Worksheet — Answers</span>
+              <span class="page-title-sub">For teacher</span>
             </div>
-            <div class="meta-row">
-              <span class="meta-label">Generated:&nbsp;</span>
-              <span class="meta-value">${createdAt ? formatDate(createdAt) : "-"}</span>
+            <div class="page-header__meta">
+              <div class="meta-row">
+                <span class="meta-label">Examples:&nbsp;</span>
+                <span class="meta-value">${examples.length}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Generated:&nbsp;</span>
+                <span class="meta-value">${createdAt ? formatDate(createdAt) : "-"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-header__fields">
+            <div class="field-row">
+              <span class="field-label">Name:</span>
+              <span class="field-line"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Date:</span>
+              <span class="field-line"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Group:</span>
+              <span class="field-line"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Level:</span>
+              <span class="field-line"></span>
             </div>
           </div>
         </div>
@@ -348,6 +457,7 @@ export function openWorksheetPrintWindow(options = {}) {
 `);
   doc.close();
 
+  // Небольшая задержка, чтобы браузер успел отрисовать, затем auto-print
   if (autoPrint) {
     printWindow.focus();
     printWindow.setTimeout(() => {
