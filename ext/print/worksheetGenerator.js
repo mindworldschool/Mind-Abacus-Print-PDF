@@ -4,7 +4,7 @@
 // Использует тот же generateExample, что и тренажёр,
 // но вызывает его много раз и возвращает массив примеров.
 
-import { getState } from "../../core/state.js";
+import { getState, setWorksheet } from "../../core/state.js";
 import { generateExample } from "../core/generator.js";
 
 /**
