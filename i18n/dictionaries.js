@@ -140,6 +140,12 @@ export const dictionaries = {
         { "value": "100", "label": "100" }
       ],
       "inlineLabel": "Show example inline",
+      "print": {
+        "label": "Print worksheet",
+        "examplesLabel": "Number of examples to print",
+        "answersLabel": "Include separate answer sheet (for teacher)",
+        "button": "Generate worksheet for printing"
+      },
       "submit": "Save settings"
     },
     "confirmation": {
@@ -195,7 +201,7 @@ export const dictionaries = {
       "cta": "Start new setup",
       "retryErrors": "Retry errors"
     },
-        "trainer": {
+    "trainer": {
       "stats": {
         "title": "Statistics",
         "total": "Total:",
@@ -317,7 +323,7 @@ export const dictionaries = {
         { "value": "6.0", "label": "6.0 segundos" },
         { "value": "7.0", "label": "7.0 segundos" },
         { "value": "8.0", "label": "8.0 segundos" },
-        { "value": "9.0", "label": "9.0 segundos" },
+        { "value": "9.0", "label": "9.0 секунд" },
         { "value": "10.0", "label": "10.0 segundos" }
       ],
       "advancedLabel": "Opciones avanzadas",
@@ -361,6 +367,12 @@ export const dictionaries = {
         { "value": "100", "label": "100" }
       ],
       "inlineLabel": "Mostrar en una línea",
+      "print": {
+        "label": "Imprimir ejercicios",
+        "examplesLabel": "Número de ejercicios para imprimir",
+        "answersLabel": "Incluir hoja de respuestas (para el profesor)",
+        "button": "Generar hoja para imprimir"
+      },
       "submit": "Guardar configuración"
     },
     "confirmation": {
@@ -416,7 +428,7 @@ export const dictionaries = {
       "cta": "Iniciar nueva configuración",
       "retryErrors": "Corregir errores"
     },
-        "trainer": {
+    "trainer": {
       "stats": {
         "title": "Estadísticas",
         "total": "Total:",
@@ -582,6 +594,12 @@ export const dictionaries = {
         { "value": "100", "label": "100" }
       ],
       "inlineLabel": "Показывать пример в строку",
+      "print": {
+        "label": "Печать примеров",
+        "examplesLabel": "Сколько примеров распечатать",
+        "answersLabel": "Показать отдельный лист с ответами (для учителя)",
+        "button": "Сформировать лист для печати"
+      },
       "submit": "Сохранить настройки"
     },
     "confirmation": {
@@ -637,7 +655,7 @@ export const dictionaries = {
       "cta": "Запустить новое задание",
       "retryErrors": "Исправить ошибки"
     },
-       "trainer": {
+    "trainer": {
       "stats": {
         "title": "Статистика",
         "total": "Всего:",
@@ -803,6 +821,12 @@ export const dictionaries = {
         { "value": "100", "label": "100" }
       ],
       "inlineLabel": "Показувати приклад у рядок",
+      "print": {
+        "label": "Друк прикладів",
+        "examplesLabel": "Кількість прикладів для друку",
+        "answersLabel": "Показати окремий лист з відповідями (для вчителя)",
+        "button": "Сформувати лист для друку"
+      },
       "submit": "Зберегти налаштування"
     },
     "confirmation": {
@@ -858,7 +882,7 @@ export const dictionaries = {
       "cta": "Почати нове налаштування",
       "retryErrors": "Виправити помилки"
     },
-        "trainer": {
+    "trainer": {
       "stats": {
         "title": "Статистика",
         "total": "Усього:",
