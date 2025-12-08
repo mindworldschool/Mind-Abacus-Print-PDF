@@ -1,34 +1,31 @@
 // ext/print/worksheetPrintWindow.js
 //
 // Открывает новое окно с разметкой листа примеров для печати.
-// Принимает на вход объект worksheet, который возвращает
-// ext/print/worksheetGenerator.js → generateWorksheet(...) .
+// Использует данные из ext/print/worksheetGenerator.js → getCurrentWorksheet().
 //
 // Структура на листе:
 //   - сетка из "карточек-примеров" (автоматически по ширине листа);
 //   - в каждой карточке:
 //       1) номер примера,
-//       2) стартовое число,
-//       3) операции столбиком (в одну строку),
-//       4) пустая ячейка для ответа,
-//       5) ещё одна пустая ячейка для ответа.
+//       2) шаги в столбик,
+//       3) две пустые строки для ответов.
 //   - при showAnswers = true добавляем вторую страницу с ответами.
+//
+
+import { getCurrentWorksheet } from "./worksheetGenerator.js";
 
 /**
  * Открыть окно с листом примеров для печати.
  *
- * @param {Object} worksheet              - объект, возвращаемый generateWorksheet(...)
  * @param {Object} [options]
  * @param {boolean} [options.autoPrint=true]  - сразу вызвать print() после загрузки
  */
-export function openWorksheetPrintWindow(worksheet, options = {}) {
+export function openWorksheetPrintWindow(options = {}) {
   const { autoPrint = true } = options;
 
-  if (
-    !worksheet ||
-    !Array.isArray(worksheet.examples) ||
-    worksheet.examples.length === 0
-  ) {
+  const worksheet = getCurrentWorksheet();
+
+  if (!worksheet || !Array.isArray(worksheet.examples) || worksheet.examples.length === 0) {
     alert("Лист примеров пустой. Сначала сгенерируйте примеры.");
     return;
   }
@@ -41,6 +38,7 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
   }
 
   const { examples, showAnswers, createdAt } = worksheet;
+
   const doc = printWindow.document;
 
   // --- Базовый HTML-каркас
@@ -48,7 +46,7 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Abacus Worksheet</title>
+  <title>Mind Abacus – Worksheet</title>
   <style>
     /* Параметры страницы для PDF-печати */
     @page {
@@ -99,6 +97,30 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
       text-align: right;
     }
 
+    .page-title-main {
+      display: block;
+      margin-bottom: 2mm;
+    }
+
+    .page-title-sub {
+      display: block;
+      font-size: 9pt;
+      color: #666;
+    }
+
+    .meta-row {
+      margin-top: 1mm;
+    }
+
+    .meta-label {
+      font-weight: 600;
+      font-size: 8pt;
+    }
+
+    .meta-value {
+      font-size: 8pt;
+    }
+
     .worksheet-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -110,7 +132,7 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
       border: 1px solid #ccc;
       border-radius: 4px;
       padding: 4mm 3mm;
-      min-height: 40mm;
+      min-height: 42mm;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -119,7 +141,7 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
 
     .example-card__header {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: baseline;
       margin-bottom: 2mm;
       border-bottom: 1px solid #eee;
@@ -130,39 +152,30 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
       font-weight: 600;
     }
 
-    .example-card__start {
-      font-size: 9pt;
-      color: #555;
-    }
-
     .example-card__steps {
-      margin: 2mm 0 2mm;
-      min-height: 18mm;
-      border-bottom: 1px dashed #ddd;
-      padding-bottom: 2mm;
+      margin: 2mm 0 3mm;
+      flex: 1;
     }
 
-    .example-card__steps-row {
+    .steps-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .steps-list__item {
       display: flex;
-      justify-content: flex-start;
-      align-items: baseline;
-      gap: 2mm;
-      line-height: 1.2;
-    }
-
-    .example-card__steps-label {
-      font-size: 8pt;
-      color: #777;
-      margin-right: 2mm;
-    }
-
-    .example-card__step {
+      justify-content: flex-end;
+      align-items: center;
       font-family: "Fira Code", "Consolas", monospace;
       font-size: 10pt;
+      line-height: 1.2;
+      border-bottom: 1px dotted #ddd;
+      padding: 1px 0;
     }
 
     .example-card__answer-block {
-      margin-top: 2mm;
+      margin-top: 1mm;
       display: flex;
       flex-direction: column;
       gap: 1.5mm;
@@ -188,30 +201,6 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
       border-bottom: 1px dashed #999;
       flex: 1;
       height: 5mm;
-    }
-
-    .page-title-main {
-      display: block;
-      margin-bottom: 2mm;
-    }
-
-    .page-title-sub {
-      display: block;
-      font-size: 9pt;
-      color: #666;
-    }
-
-    .meta-row {
-      margin-top: 1mm;
-    }
-
-    .meta-label {
-      font-weight: 600;
-      font-size: 8pt;
-    }
-
-    .meta-value {
-      font-size: 8pt;
     }
 
     .page-break {
@@ -255,8 +244,8 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
   doc.write(`<div class="page">
     <div class="page-header">
       <div class="page-header__title">
-        <span class="page-title-main">Abacus Worksheet</span>
-        <span class="page-title-sub">Practice examples</span>
+        <span class="page-title-main">Mind Abacus – Worksheet</span>
+        <span class="page-title-sub">Practice sheet</span>
       </div>
       <div class="page-header__meta">
         <div class="meta-row">
@@ -280,30 +269,28 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
       <div class="example-card">
         <div class="example-card__header">
           <div class="example-card__number">№ ${ex.index}</div>
-          <div class="example-card__start">Start: ${safeNumber(ex.start)}</div>
         </div>
 
         <div class="example-card__steps">
-          <div class="example-card__steps-row">
-            <div class="example-card__steps-label">Steps:</div>
-            <div>
-              ${stepsFormatted
+          <ul class="steps-list">
+            ${
+              stepsFormatted
                 .map(
                   (s) =>
-                    `<span class="example-card__step">${escapeHtml(s)}</span>`
+                    `<li class="steps-list__item">${escapeHtml(s)}</li>`
                 )
-                .join(" ")}
-            </div>
-          </div>
+                .join("")
+            }
+          </ul>
         </div>
 
         <div class="example-card__answer-block">
           <div class="answer-line">
-            <span class="answer-line__label">Answer 1:</span>
+            <span class="answer-line__label">1)</span>
             <span class="answer-line__field"></span>
           </div>
           <div class="answer-line">
-            <span class="answer-line__label">Answer 2:</span>
+            <span class="answer-line__label">2)</span>
             <span class="answer-line__field"></span>
           </div>
         </div>
@@ -322,7 +309,7 @@ export function openWorksheetPrintWindow(worksheet, options = {}) {
       <div class="page page-break">
         <div class="page-header">
           <div class="page-header__title">
-            <span class="page-title-main">Abacus Worksheet — Answers</span>
+            <span class="page-title-main">Mind Abacus – Answers</span>
             <span class="page-title-sub">For teacher</span>
           </div>
           <div class="page-header__meta">
@@ -409,7 +396,7 @@ function formatDate(isoString) {
     const minutes = pad(d.getMinutes());
 
     return `${year}-${month}-${day} ${hours}:${minutes}`;
-  } catch {
+  } catch (e) {
     return "-";
   }
 }
