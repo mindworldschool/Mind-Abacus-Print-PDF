@@ -1,4 +1,9 @@
-import { createScreenShell, createButton, createStepIndicator, formatOptionLabel } from "./helper.js";
+import {
+  createScreenShell,
+  createButton,
+  createStepIndicator,
+  formatOptionLabel
+} from "./helper.js";
 import { generateWorksheet } from "../ext/print/worksheetGenerator.js";
 import { openWorksheetPrintWindow } from "../ext/print/worksheetPrintWindow.js";
 
@@ -22,7 +27,7 @@ export function renderConfirmation(container, { t, state, navigate }) {
   list.className = "summary-card__list";
 
   const labels = t("confirmation.list");
-  const settings = state.settings;
+  const settings = state.settings || {};
 
   const booleanText = t("confirmation.boolean");
   const counterText = t("confirmation.counter");
@@ -30,11 +35,18 @@ export function renderConfirmation(container, { t, state, navigate }) {
   const mode = formatOptionLabel(t("settings.modeOptions"), settings.mode);
   const digits = formatOptionLabel(t("settings.digitsOptions"), settings.digits);
   const combine = settings.combineLevels ? booleanText.yes : booleanText.no;
-  const actionCount = settings.actions.infinite ? counterText.infinity : String(settings.actions.count);
-  const examples = settings.examples.infinite ? counterText.infinity : String(settings.examples.count);
+  const actionCount = settings.actions?.infinite
+    ? counterText.infinity
+    : String(settings.actions?.count ?? 0);
+  const examples = settings.examples?.infinite
+    ? counterText.infinity
+    : String(settings.examples?.count ?? 0);
   const time = formatOptionLabel(t("settings.timeOptions"), settings.timeLimit);
   const speed = formatOptionLabel(t("settings.speedOptions"), settings.speed);
-  const transition = formatOptionLabel(t("settings.transitionOptions"), settings.transition);
+  const transition = formatOptionLabel(
+    t("settings.transitionOptions"),
+    settings.transition
+  );
   const inline = settings.inline ? booleanText.yes : booleanText.no;
 
   const entries = [
@@ -52,7 +64,7 @@ export function renderConfirmation(container, { t, state, navigate }) {
   const featuresText = t("confirmation.features");
   const toggleLabels = t("settings.toggles");
   const featureSeparator = featuresText.separator || ", ";
-  const enabledToggles = Object.entries(settings.toggles)
+  const enabledToggles = Object.entries(settings.toggles || {})
     .filter(([, active]) => active)
     .map(([key]) => toggleLabels[key])
     .filter(Boolean);
@@ -67,21 +79,20 @@ export function renderConfirmation(container, { t, state, navigate }) {
   const blockOrder = ["simple", "brothers", "friends", "mix"];
 
   blockOrder.forEach((key) => {
-    const blockState = settings.blocks[key];
-    if (!blockState) {
-      return;
-    }
+    const blockState = settings.blocks?.[key];
+    if (!blockState) return;
+
     const digitsValue = blockState.digits.length
       ? blockState.digits.join(blockSeparator)
       : blockText.none;
     const extras = [];
-    if (blockState.onlyAddition) {
-      extras.push(blockText.additionOnly);
-    }
-    if (blockState.onlySubtraction) {
-      extras.push(blockText.subtractionOnly);
-    }
-    const value = extras.length ? `${digitsValue} (${extras.join(blockSeparator)})` : digitsValue;
+    if (blockState.onlyAddition) extras.push(blockText.additionOnly);
+    if (blockState.onlySubtraction) extras.push(blockText.subtractionOnly);
+
+    const value = extras.length
+      ? `${digitsValue} (${extras.join(blockSeparator)})`
+      : digitsValue;
+
     entries.push({ label: blockLabels[key] || key, value });
   });
 
@@ -104,38 +115,54 @@ export function renderConfirmation(container, { t, state, navigate }) {
     onClick: () => navigate("settings")
   });
 
+  // Локализованный текст для кнопки превью
+  const previewLabels = {
+    ua: "Попередній перегляд листа",
+    ru: "Предпросмотр листа",
+    en: "Preview worksheet",
+    es: "Vista previa de la hoja"
+  };
+  const previewLabel =
+    previewLabels[state.language] || previewLabels.en;
+
+  // Один общий хелпер: сгенерировать лист и открыть окно
+  function generateAndOpen(autoPrint) {
+    const s = state.settings || {};
+
+    const rawExamplesCount =
+      s.print?.examplesCount ?? s.examples?.count ?? 10;
+
+    const rawNumber = Number(rawExamplesCount);
+    const examplesCount =
+      Number.isFinite(rawNumber) && rawNumber > 0 ? rawNumber : 10;
+
+    const showAnswers =
+      typeof s.print?.showAnswers === "boolean"
+        ? s.print.showAnswers
+        : true;
+
+    const worksheet = generateWorksheet({
+      examplesCount,
+      showAnswers
+    });
+
+    if (worksheet) {
+      openWorksheetPrintWindow({ autoPrint });
+    }
+  }
+
+  // Кнопка ПРЕДПРОСМОТР (без автоматической печати)
+  const previewButton = createButton({
+    label: previewLabel,
+    variant: "secondary",
+    onClick: () => generateAndOpen(false)
+  });
+
+  // Кнопка ПЕЧАТЬ (сразу вызвать print())
   const printButton = createButton({
     label: t("confirmation.printButton"),
     variant: "secondary",
-    onClick: () => {
-      const settings = state.settings || {};
-
-      // Берём количество примеров для печати:
-      const rawExamplesCount =
-        (settings.print && settings.print.examplesCount) ??
-        (settings.examples && settings.examples.count) ??
-        10;
-
-      const rawNumber = Number(rawExamplesCount);
-      const examplesCount =
-        Number.isFinite(rawNumber) && rawNumber > 0 ? rawNumber : 10;
-
-      // Нужен ли лист с ответами — берём из settings.print.showAnswers, иначе по умолчанию true
-      const showAnswers =
-        settings.print && typeof settings.print.showAnswers === "boolean"
-          ? settings.print.showAnswers
-          : true;
-
-      const worksheet = generateWorksheet({
-        examplesCount,
-        showAnswers
-      });
-
-      if (worksheet) {
-        // окно печати само возьмёт текущий worksheet из state
-        openWorksheetPrintWindow({ autoPrint: true });
-      }
-    }
+    onClick: () => generateAndOpen(true)
   });
 
   const continueButton = createButton({
@@ -143,8 +170,8 @@ export function renderConfirmation(container, { t, state, navigate }) {
     onClick: () => navigate("game")
   });
 
-  // Теперь три кнопки: Назад, Распечатать, Продолжить
-  actions.append(backButton, printButton, continueButton);
+  // 4 кнопки: Назад / Превью / Печать / Продолжить
+  actions.append(backButton, previewButton, printButton, continueButton);
 
   body.append(summaryCard, actions);
   container.appendChild(section);
