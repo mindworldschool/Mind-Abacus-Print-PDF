@@ -1,4 +1,6 @@
 import { createScreenShell, createButton, createStepIndicator, formatOptionLabel } from "./helper.js";
+import { generateWorksheet } from "../ext/print/worksheetGenerator.js";
+import { openWorksheetPrintWindow } from "../ext/print/worksheetPrintWindow.js";
 
 export function renderConfirmation(container, { t, state, navigate }) {
   const { section, body, heading, paragraph } = createScreenShell({
@@ -101,12 +103,40 @@ export function renderConfirmation(container, { t, state, navigate }) {
     onClick: () => navigate("settings")
   });
 
+  const printButton = createButton({
+    label: t("confirmation.printButton"),
+    variant: "secondary",
+    onClick: () => {
+      const settings = state.settings;
+
+      // Берём количество примеров для печати:
+      const rawExamplesCount =
+        (settings.print && settings.print.examplesCount) ??
+        (settings.examples && settings.examples.count) ??
+        10;
+
+      const examplesCount = Number(rawExamplesCount) > 0 ? Number(rawExamplesCount) : 10;
+      const showAnswers = !!(settings.print && settings.print.showAnswers);
+
+      const worksheet = generateWorksheet({
+        settings,
+        examplesCount
+      });
+
+      openWorksheetPrintWindow(worksheet, {
+        includeAnswers: showAnswers,
+        lang: state.language || "ru"
+      });
+    }
+  });
+
   const continueButton = createButton({
     label: t("buttons.continue"),
     onClick: () => navigate("game")
   });
 
-  actions.append(backButton, continueButton);
+  // Теперь три кнопки: Назад, Распечатать, Продолжить
+  actions.append(backButton, printButton, continueButton);
 
   body.append(summaryCard, actions);
   container.appendChild(section);
