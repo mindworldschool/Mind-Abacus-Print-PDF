@@ -2,27 +2,27 @@
 //
 // Генератор листа примеров для печати.
 // Использует тот же generateExample, что и тренажёр,
-// но вызывает его много раз и сохраняет результат в state.worksheet.
+// но вызывает его много раз и возвращает массив примеров.
 
-import { getState, setWorksheet } from "../../core/state.js";
+import { getState } from "../../core/state.js";
 import { generateExample } from "../core/generator.js";
 
 /**
  * @typedef {Object} WorksheetExample
- * @property {number} index      Порядковый номер примера (1, 2, 3, ...)
+ * @property {number} index      Порядковый номер примера
  * @property {number} start      Стартовое число на абакусе
- * @property {string[]} steps    Шаги вида ["+3", "-1", "+4", ...]
- * @property {number} answer     Ответ (итоговое число)
+ * @property {string[]} steps    Шаги вида ["+3", "-1", "+4"]
+ * @property {number} answer     Итоговое число
  */
 
 /**
  * @typedef {Object} GenerateWorksheetOptions
  * @property {number} examplesCount  Сколько примеров сгенерировать
- * @property {boolean} showAnswers   Нужен ли лист с ответами (для учителя)
+ * @property {boolean} showAnswers   Включать ли лист ответов
  */
 
 /**
- * Генерация полного листа примеров для печати.
+ * Генерация листа примеров для печати.
  *
  * @param {GenerateWorksheetOptions} [options]
  * @returns {{
@@ -39,7 +39,7 @@ export function generateWorksheet(options = {}) {
   const trainerSettings = fullState.settings;
 
   if (!trainerSettings) {
-    console.warn("[worksheet] Нет настроек тренажёра, генерация листа невозможна");
+    console.warn("[worksheet] Нет настроек тренажёра — генерация невозможна");
     return null;
   }
 
@@ -47,11 +47,10 @@ export function generateWorksheet(options = {}) {
   const examples = [];
 
   for (let i = 0; i < examplesCount; i++) {
-    // ⚠️ Очень важно: используем тот же генератор, что и тренажёр
     const ex = generateExample(trainerSettings);
 
     if (!ex) {
-      console.warn("[worksheet] generateExample вернул пустой результат, пропускаем пример", i);
+      console.warn("[worksheet] generateExample вернул пустой результат, пропуск:", i);
       continue;
     }
 
@@ -70,17 +69,12 @@ export function generateWorksheet(options = {}) {
     showAnswers: Boolean(showAnswers)
   };
 
-  // Сохраняем в глобальное состояние — позже экран печати прочитает state.worksheet
-  setWorksheet(worksheet);
-
-  console.log("[worksheet] Лист примеров сгенерирован:", worksheet);
-
   return worksheet;
 }
 
 /**
- * Утилита для чтения текущего листа из state.
- * (Можно использовать в ui/worksheet.js)
+ * (На будущее)
+ * Получает текущий worksheet, если ты решишь сохранить его в state
  */
 export function getCurrentWorksheet() {
   const fullState = getState();
