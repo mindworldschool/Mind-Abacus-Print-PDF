@@ -15,7 +15,10 @@
 //   - при showAnswers = true добавляем вторую страницу с ответами.
 //
 
+import { t, getCurrentLanguage } from "../../core/i18n.js";
 import { getCurrentWorksheet } from "./worksheetGenerator.js";
+
+const EXAMPLES_PER_PAGE = 10;
 
 /**
  * Открыть окно с листом примеров для печати.
@@ -29,27 +32,33 @@ export function openWorksheetPrintWindow(options = {}) {
   const worksheet = getCurrentWorksheet();
 
   if (!worksheet || !Array.isArray(worksheet.examples) || worksheet.examples.length === 0) {
-    alert("Лист примеров пустой. Сначала сгенерируйте примеры.");
+   alert(t("printSheet.emptyWorksheet"));
     return;
   }
 
   const printWindow = window.open("", "_blank");
 
   if (!printWindow) {
-    alert("Не удалось открыть окно для печати. Разрешите всплывающие окна в браузере.");
+   alert(t("printSheet.popupBlocked"));
     return;
   }
 
   const { examples, showAnswers, createdAt } = worksheet;
+  const language = getCurrentLanguage();
+  const texts = getPrintTexts();
+  const totalExamples = examples.length;
+  const worksheetPages = chunkExamples(examples, EXAMPLES_PER_PAGE);
+  const worksheetDate = createdAt ? formatDate(createdAt, language) : "-";
 
   const doc = printWindow.document;
 
   // --- Базовый HTML-каркас
   doc.write(`<!DOCTYPE html>
 <html lang="en">
+<html lang="${escapeHtml(language)}">
 <head>
   <meta charset="UTF-8" />
-  <title>Abacus Worksheet</title>
+  <title>${escapeHtml(texts.title)}</title>
   <style>
     /* Параметры страницы для PDF-печати */
     @page {
@@ -187,6 +196,8 @@ export function openWorksheetPrintWindow(options = {}) {
       flex-direction: column;
       justify-content: flex-start;
       font-size: 9.5pt;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .example-card__header {
@@ -285,6 +296,8 @@ export function openWorksheetPrintWindow(options = {}) {
       display: flex;
       align-items: baseline;
       gap: 2mm;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .answers-item__index {
@@ -306,131 +319,131 @@ export function openWorksheetPrintWindow(options = {}) {
 <body>
 `);
 
-  // --- Первая страница: примеры
-  doc.write(`<div class="page">
-    <div class="page-header">
-      <div class="page-header__left">
-        <div class="page-header__logo">MindWorld School</div>
-        <div class="page-header__title">
-          <span class="page-title-main">Abacus Worksheet</span>
-          <span class="page-title-sub">Practice examples</span>
-        </div>
-        <div class="page-header__meta">
-          <div class="meta-row">
-            <span class="meta-label">Examples:&nbsp;</span>
-            <span class="meta-value">${examples.length}</span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Generated:&nbsp;</span>
-            <span class="meta-value">${createdAt ? formatDate(createdAt) : "-"}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="page-header__fields">
-        <div class="field-row">
-          <span class="field-label">Name:</span>
-          <span class="field-line"></span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Date:</span>
-          <span class="field-line"></span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Group:</span>
-          <span class="field-line"></span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Level:</span>
-          <span class="field-line"></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="worksheet-grid">
-  `);
-
-  examples.forEach((ex) => {
-    const stepsFormatted = (ex.steps || []).map((s) => String(s));
+ worksheetPages.forEach((pageExamples, pageIndex) => {
+    const isFirstPage = pageIndex === 0;
 
     doc.write(`
-      <div class="example-card">
-        <div class="example-card__header">
-          <div class="example-card__number">№ ${ex.index}</div>
-          <div class="example-card__start">Start: ${safeNumber(ex.start)}</div>
+      <div class="page${isFirstPage ? "" : " page-break"}">
+        <div class="page-header">
+          <div class="page-header__left">
+            <div class="page-header__logo">MindWorld School</div>
+            <div class="page-header__title">
+              <span class="page-title-main">${escapeHtml(texts.title)}</span>
+              <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
+            </div>
+            <div class="page-header__meta">
+              <div class="meta-row">
+                <span class="meta-label">${escapeHtml(texts.metaExamples)}&nbsp;</span>
+                <span class="meta-value">${totalExamples}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">${escapeHtml(texts.metaGenerated)}&nbsp;</span>
+                <span class="meta-value">${worksheetDate}</span>
+              </div>
+            </div>
+          </div>
+        
+       <div class="page-header__fields">
+            <div class="field-row">
+              <span class="field-label">${escapeHtml(texts.fieldName)}</span>
+              <span class="field-line"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
+              <span class="field-line"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">${escapeHtml(texts.fieldGroup)}</span>
+              <span class="field-line"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">${escapeHtml(texts.fieldLevel)}</span>
+              <span class="field-line"></span>
+            </div>
+          </div>
         </div>
+     
+    <div class="worksheet-grid">
+    `);
 
-        <div class="example-card__steps">
-         <div class="example-card__steps-label">Steps:</div>
-          <div class="example-card__steps-list">
-            ${stepsFormatted
-              .map(
-                (s) =>
-                  `<span class="example-card__step">${escapeHtml(
-                    s
-                  )}</span>`
-              )
-              .join("")}
+    pageExamples.forEach((ex) => {
+      const stepsFormatted = (ex.steps || []).map((s) => String(s));
+      
+        doc.write(`
+        <div class="example-card">
+          <div class="example-card__header">
+            <div class="example-card__number">№ ${ex.index}</div>
+            <div class="example-card__start">${escapeHtml(texts.startLabel)} ${safeNumber(ex.start)}</div>
+          </div>
+       
+         <div class="example-card__steps">
+            <div class="example-card__steps-label">${escapeHtml(texts.stepsLabel)}</div>
+            <div class="example-card__steps-list">
+              ${stepsFormatted
+                .map(
+                  (s) =>
+                    `<span class="example-card__step">${escapeHtml(s)}</span>`
+                )
+                .join("")}
+            </div>
+          </div>
+          <div class="example-card__answer-block">
+            <div class="answer-line">
+              <span class="answer-line__label">${escapeHtml(texts.answer1Label)}</span>
+              <span class="answer-line__field"></span>
+            </div>
+            <div class="answer-line">
+              <span class="answer-line__label">${escapeHtml(texts.answer2Label)}</span>
+              <span class="answer-line__field"></span>
+            </div>
           </div>
         </div>
+      `);
+    });
 
-        <div class="example-card__answer-block">
-          <div class="answer-line">
-            <span class="answer-line__label">Answer 1:</span>
-            <span class="answer-line__field"></span>
-          </div>
-          <div class="answer-line">
-            <span class="answer-line__label">Answer 2:</span>
-            <span class="answer-line__field"></span>
-          </div>
-        </div>
-      </div>
+    doc.write(`
+        </div> <!-- /worksheet-grid -->
+      </div> <!-- /page (worksheet) -->
     `);
   });
 
-  doc.write(`
-    </div> <!-- /worksheet-grid -->
-  </div> <!-- /page (worksheet) -->
-  `);
-
-  // --- Вторая страница: ответы (если включено)
-  if (showAnswers) {
+    if (showAnswers) {
     doc.write(`
       <div class="page page-break">
         <div class="page-header">
           <div class="page-header__left">
             <div class="page-header__logo">MindWorld School</div>
             <div class="page-header__title">
-              <span class="page-title-main">Abacus Worksheet — Answers</span>
-              <span class="page-title-sub">For teacher</span>
+               <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
+              <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
             </div>
             <div class="page-header__meta">
               <div class="meta-row">
-                <span class="meta-label">Examples:&nbsp;</span>
-                <span class="meta-value">${examples.length}</span>
+               <span class="meta-label">${escapeHtml(texts.metaExamples)}&nbsp;</span>
+                <span class="meta-value">${totalExamples}</span>
               </div>
               <div class="meta-row">
-                <span class="meta-label">Generated:&nbsp;</span>
-                <span class="meta-value">${createdAt ? formatDate(createdAt) : "-"}</span>
+                <span class="meta-label">${escapeHtml(texts.metaGenerated)}&nbsp;</span>
+                <span class="meta-value">${worksheetDate}</span>
               </div>
             </div>
           </div>
 
           <div class="page-header__fields">
             <div class="field-row">
-              <span class="field-label">Name:</span>
+              <span class="field-label">${escapeHtml(texts.fieldName)}</span>
               <span class="field-line"></span>
             </div>
             <div class="field-row">
-              <span class="field-label">Date:</span>
+              <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
               <span class="field-line"></span>
             </div>
             <div class="field-row">
-              <span class="field-label">Group:</span>
+              <span class="field-label">${escapeHtml(texts.fieldGroup)}</span>
               <span class="field-line"></span>
             </div>
             <div class="field-row">
-              <span class="field-label">Level:</span>
+              <span class="field-label">${escapeHtml(texts.fieldLevel)}</span>
               <span class="field-line"></span>
             </div>
           </div>
@@ -468,6 +481,34 @@ export function openWorksheetPrintWindow(options = {}) {
     }, 100);
   }
 }
+function getPrintTexts() {
+  return {
+    title: t("printSheet.title"),
+    subtitle: t("printSheet.subtitle"),
+    answersTitle: t("printSheet.answersTitle"),
+    answersSubtitle: t("printSheet.answersSubtitle"),
+    metaExamples: t("printSheet.metaExamples"),
+    metaGenerated: t("printSheet.metaGenerated"),
+    fieldName: t("printSheet.fieldName"),
+    fieldDate: t("printSheet.fieldDate"),
+    fieldGroup: t("printSheet.fieldGroup"),
+    fieldLevel: t("printSheet.fieldLevel"),
+    startLabel: t("printSheet.startLabel"),
+    stepsLabel: t("printSheet.stepsLabel"),
+    answer1Label: t("printSheet.answer1Label"),
+    answer2Label: t("printSheet.answer2Label")
+  };
+}
+
+function chunkExamples(list, size) {
+  const pages = [];
+
+  for (let i = 0; i < list.length; i += size) {
+    pages.push(list.slice(i, i + size));
+  }
+
+  return pages;
+}
 
 /**
  * Защита от XSS — экранируем спецсимволы в строках.
@@ -493,22 +534,22 @@ function safeNumber(value) {
 
 /**
  * Форматируем дату для подписи на листе.
- * Формат: YYYY-MM-DD HH:MM
+ * Формат: локализованное отображение
  */
-function formatDate(isoString) {
+function formatDate(isoString, lang = "en") {
   try {
     const d = new Date(isoString);
     if (Number.isNaN(d.getTime())) return "-";
 
-    const pad = (n) => (n < 10 ? "0" + n : String(n));
+    const formatter = new Intl.DateTimeFormat(lang, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
 
-    const year = d.getFullYear();
-    const month = pad(d.getMonth() + 1);
-    const day = pad(d.getDate());
-    const hours = pad(d.getHours());
-    const minutes = pad(d.getMinutes());
-
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+     return formatter.format(d).replace(",", "").trim();
   } catch (e) {
     return "-";
   }
