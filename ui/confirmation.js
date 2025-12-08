@@ -65,6 +65,7 @@ export function renderConfirmation(container, { t, state, navigate }) {
   const blockLabels = blockText.labels || {};
   const blockSeparator = blockText.separator || ", ";
   const blockOrder = ["simple", "brothers", "friends", "mix"];
+
   blockOrder.forEach((key) => {
     const blockState = settings.blocks[key];
     if (!blockState) {
@@ -131,7 +132,8 @@ export function renderConfirmation(container, { t, state, navigate }) {
       });
 
       if (worksheet) {
-        openWorksheetPrintWindow(worksheet, { autoPrint: true });
+        // окно печати само возьмёт текущий worksheet из state
+        openWorksheetPrintWindow({ autoPrint: true });
       }
     }
   });
