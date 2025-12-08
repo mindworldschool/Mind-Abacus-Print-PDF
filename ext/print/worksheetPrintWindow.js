@@ -212,26 +212,31 @@ export function openWorksheetPrintWindow(options = {}) {
       min-height: 15mm;
       border-bottom: 1px dashed #ddcbb2;
       padding-bottom: 1.5mm;
-    }
-
-    .example-card__steps-row {
-      display: flex;
-      justify-content: flex-start;
-      align-items: baseline;
-      gap: 2mm;
-      line-height: 1.2;
+    display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 2mm;
+      row-gap: 1.2mm;
+      align-items: start;
     }
 
     .example-card__steps-label {
       font-size: 8pt;
       color: #777;
-      margin-right: 2mm;
       white-space: nowrap;
+      align-self: start;
+      padding-top: 0.5mm;
+    }
+
+    .example-card__steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6mm;
     }
 
     .example-card__step {
       font-family: "Fira Code", "Consolas", monospace;
       font-size: 9.5pt;
+      line-height: 1.25;
     }
 
     .example-card__answer-block {
@@ -356,18 +361,16 @@ export function openWorksheetPrintWindow(options = {}) {
         </div>
 
         <div class="example-card__steps">
-          <div class="example-card__steps-row">
-            <div class="example-card__steps-label">Steps:</div>
-            <div>
-              ${stepsFormatted
-                .map(
-                  (s) =>
-                    `<span class="example-card__step">${escapeHtml(
-                      s
-                    )}</span>`
-                )
-                .join(" ")}
-            </div>
+         <div class="example-card__steps-label">Steps:</div>
+          <div class="example-card__steps-list">
+            ${stepsFormatted
+              .map(
+                (s) =>
+                  `<span class="example-card__step">${escapeHtml(
+                    s
+                  )}</span>`
+              )
+              .join("")}
           </div>
         </div>
 
