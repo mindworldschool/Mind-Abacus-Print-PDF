@@ -160,8 +160,7 @@ export const dictionaries = {
         "time": "Time limit",
         "speed": "Display speed",
         "transition": "Carry over",
-        "inline": "Inline example",
-        "printButton": "Print worksheets"
+        "inline": "Inline example"
       },
       "boolean": {
         "yes": "Yes",
@@ -186,7 +185,8 @@ export const dictionaries = {
         "subtractionOnly": "subtraction only",
         "none": "Not selected",
         "separator": ", "
-      }
+      },
+      "printButton": "Print worksheets (PDF)"
     },
     "game": {
       "title": "Training session",
@@ -324,7 +324,7 @@ export const dictionaries = {
         { "value": "6.0", "label": "6.0 segundos" },
         { "value": "7.0", "label": "7.0 segundos" },
         { "value": "8.0", "label": "8.0 segundos" },
-        { "value": "9.0", "label": "9.0 секунд" },
+        { "value": "9.0", "label": "9.0 segundos" },
         { "value": "10.0", "label": "10.0 segundos" }
       ],
       "advancedLabel": "Opciones avanzadas",
@@ -388,8 +388,7 @@ export const dictionaries = {
         "time": "Límite de tiempo",
         "speed": "Velocidad",
         "transition": "Cruce sobre",
-        "inline": "Ejemplo en línea",
-        "printButton": "Imprimir tareas"
+        "inline": "Ejemplo en línea"
       },
       "boolean": {
         "yes": "Sí",
@@ -414,7 +413,8 @@ export const dictionaries = {
         "subtractionOnly": "solo resta",
         "none": "Sin seleccionar",
         "separator": ", "
-      }
+      },
+      "printButton": "Imprimir tareas (PDF)"
     },
     "game": {
       "title": "Sesión de práctica",
@@ -616,8 +616,7 @@ export const dictionaries = {
         "time": "Ограничение времени",
         "speed": "Скорость показа",
         "transition": "Переход через",
-        "inline": "Пример в строку",
-        "printButton": "Распечатать задания"
+        "inline": "Пример в строку"
       },
       "boolean": {
         "yes": "Да",
@@ -642,7 +641,8 @@ export const dictionaries = {
         "subtractionOnly": "только вычитание",
         "none": "Не выбрано",
         "separator": ", "
-      }
+      },
+      "printButton": "Распечатать задания (PDF)"
     },
     "game": {
       "title": "Тренировочная сессия",
@@ -844,8 +844,7 @@ export const dictionaries = {
         "time": "Обмеження часу",
         "speed": "Швидкість показу",
         "transition": "Перехід через",
-        "inline": "Приклад у рядок",
-       "printButton": "Роздрукувати завдання" 
+        "inline": "Приклад у рядок"
       },
       "boolean": {
         "yes": "Так",
@@ -870,7 +869,8 @@ export const dictionaries = {
         "subtractionOnly": "лише віднімання",
         "none": "Не вибрано",
         "separator": ", "
-      }
+      },
+      "printButton": "Роздрукувати завдання (PDF)"
     },
     "game": {
       "title": "Тренувальна сесія",
