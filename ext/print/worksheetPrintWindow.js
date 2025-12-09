@@ -121,9 +121,10 @@ export function openWorksheetPrintWindow(options = {}) {
 
     .page-header__left {
       display: flex;
-      flex-direction: column;
-      gap: 3mm;
-      max-width: 60%;
+      flex-direction: row;
+      align-items: center;
+      gap: 8mm;
+      flex: 1;
     }
 
     .page-header__logo {
@@ -157,8 +158,8 @@ export function openWorksheetPrintWindow(options = {}) {
       grid-template-columns: 1fr;
       gap: 2mm;
       font-size: 9pt;
-      min-width: 90mm;
-      margin-left: 6mm;
+      min-width: 72mm;
+      margin-left: 8mm;
     }
 
     .field-row {
@@ -218,48 +219,19 @@ export function openWorksheetPrintWindow(options = {}) {
       break-inside: avoid;
     }
 
-    .example-card__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 1.5mm;
-      border-bottom: 1px solid #eee0cf;
-      padding-bottom: 1mm;
-    }
-
     .example-card__number {
       font-weight: 600;
-    }
-
-    .example-card__start {
-      font-size: 8.5pt;
-      color: #555;
+      text-align: center;
+      margin-bottom: 2mm;
+      font-size: 10pt;
     }
 
     .example-card__steps {
-      margin: 1.5mm 0 1.5mm;
+      margin: 2mm 0;
       min-height: 15mm;
-      border-bottom: 1px dashed #ddcbb2;
-      padding-bottom: 1.5mm;
-    display: grid;
-      grid-template-columns: auto 1fr;
-      column-gap: 2mm;
-      row-gap: 1.2mm;
-      align-items: start;
-    }
-
-    .example-card__steps-label {
-      font-size: 8pt;
-      color: #777;
-      white-space: nowrap;
-      align-self: start;
-      padding-top: 0.5mm;
-    }
-
-    .example-card__steps-list {
       display: flex;
       flex-direction: column;
-      gap: 0.6mm;
+      gap: 0.8mm;
     }
 
     .example-card__step {
@@ -276,25 +248,8 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     .answer-line {
-      border: 1px solid #c0b29c;
-      border-radius: 3px;
+      border-bottom: 1px solid #c0b29c;
       height: 7mm;
-      display: flex;
-      align-items: center;
-      padding: 0 1.5mm;
-    }
-
-    .answer-line__label {
-      font-size: 7.5pt;
-      color: #777;
-      margin-right: 2mm;
-      white-space: nowrap;
-    }
-
-    .answer-line__field {
-      border-bottom: 1px dashed #999;
-      flex: 1;
-      height: 4mm;
     }
 
     .page-break {
@@ -328,6 +283,10 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     @media print {
+      @page {
+        margin: 0;
+      }
+
       body {
         margin: 0;
         padding: 0;
@@ -360,18 +319,8 @@ export function openWorksheetPrintWindow(options = {}) {
               <span class="page-title-main">${escapeHtml(texts.title)}</span>
               <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
             </div>
-            <div class="page-header__meta">
-              <div class="meta-row">
-                <span class="meta-label">${escapeHtml(texts.metaExamples)}&nbsp;</span>
-                <span class="meta-value">${totalExamples}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-label">${escapeHtml(texts.metaGenerated)}&nbsp;</span>
-                <span class="meta-value">${worksheetDate}</span>
-              </div>
-            </div>
           </div>
-        
+
        <div class="page-header__fields">
             <div class="field-row">
               <span class="field-label">${escapeHtml(texts.fieldName)}</span>
@@ -397,34 +346,23 @@ export function openWorksheetPrintWindow(options = {}) {
 
     pageExamples.forEach((ex) => {
       const stepsFormatted = (ex.steps || []).map((s) => String(s));
-      
+
         doc.write(`
         <div class="example-card">
-          <div class="example-card__header">
-            <div class="example-card__number">№ ${ex.index}</div>
-            <div class="example-card__start">${escapeHtml(texts.startLabel)} ${safeNumber(ex.start)}</div>
-          </div>
-       
-         <div class="example-card__steps">
-            <div class="example-card__steps-label">${escapeHtml(texts.stepsLabel)}</div>
-            <div class="example-card__steps-list">
+          <div class="example-card__number">№ ${ex.index}</div>
+
+          <div class="example-card__steps">
               ${stepsFormatted
                 .map(
                   (s) =>
                     `<span class="example-card__step">${escapeHtml(s)}</span>`
                 )
                 .join("")}
-            </div>
           </div>
+
           <div class="example-card__answer-block">
-            <div class="answer-line">
-              <span class="answer-line__label">${escapeHtml(texts.answer1Label)}</span>
-              <span class="answer-line__field"></span>
-            </div>
-            <div class="answer-line">
-              <span class="answer-line__label">${escapeHtml(texts.answer2Label)}</span>
-              <span class="answer-line__field"></span>
-            </div>
+            <div class="answer-line"></div>
+            <div class="answer-line"></div>
           </div>
         </div>
       `);
@@ -452,16 +390,6 @@ export function openWorksheetPrintWindow(options = {}) {
             <div class="page-header__title">
                <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
               <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
-            </div>
-            <div class="page-header__meta">
-              <div class="meta-row">
-               <span class="meta-label">${escapeHtml(texts.metaExamples)}&nbsp;</span>
-                <span class="meta-value">${totalExamples}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-label">${escapeHtml(texts.metaGenerated)}&nbsp;</span>
-                <span class="meta-value">${worksheetDate}</span>
-              </div>
             </div>
           </div>
 
