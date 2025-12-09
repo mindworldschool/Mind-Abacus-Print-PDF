@@ -223,6 +223,7 @@ export const dictionaries = {
     "trainer": {
       "stats": {
         "title": "Statistics",
+        "actions": "Number of actions",
         "total": "Total:",
         "completed": "Completed:",
         "correct": "Correct:",
@@ -469,6 +470,7 @@ export const dictionaries = {
     "trainer": {
       "stats": {
         "title": "Estadísticas",
+        "actions": "Número de acciones",
         "total": "Total:",
         "completed": "Resueltos:",
         "correct": "Correctas:",
@@ -715,6 +717,7 @@ export const dictionaries = {
     "trainer": {
       "stats": {
         "title": "Статистика",
+        "actions": "Количество действий",
         "total": "Всего:",
         "completed": "Решено:",
         "correct": "Правильно:",
@@ -961,6 +964,7 @@ export const dictionaries = {
     "trainer": {
       "stats": {
         "title": "Статистика",
+        "actions": "Кількість дій",
         "total": "Усього:",
         "completed": "Вирішено:",
         "correct": "Правильно:",

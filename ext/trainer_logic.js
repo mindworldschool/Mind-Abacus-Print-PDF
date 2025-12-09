@@ -76,109 +76,65 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   panelControls.id = "panel-controls";
   panelControls.className = "panel-controls";
 
-  // --- Карточка Статистика
+  // --- Карточка Статистика (results-capsule-extended)
   const statsCard = document.createElement("div");
-  statsCard.className = "panel-card panel-card--stats";
+  statsCard.className = "results-capsule-extended";
 
-  const statsTitle = document.createElement("div");
-  statsTitle.className = "panel-card__title";
-  statsTitle.textContent =
-    t?.("trainer.stats.title") || "Статистика";
+  const statsHeader = document.createElement("div");
+  statsHeader.className = "results-capsule-extended__header";
 
-  const statsBody = document.createElement("div");
-  statsBody.className = "panel-card__body panel-card__body--stats";
+  const statsLabel = document.createElement("div");
+  statsLabel.className = "results-capsule-extended__label";
+  statsLabel.textContent = t?.("trainer.stats.actions") || "Количество действий";
 
-  const statTotal = document.createElement("div");
-  statTotal.className = "stat-item";
-  statTotal.innerHTML = `
-    <span class="stat-item__label">${
-      t?.("trainer.stats.total") || "Всего:"
-    }</span>
-    <span class="stat-item__value" id="stats-total">${exampleCount}</span>
+  const statsCounter = document.createElement("div");
+  statsCounter.className = "results-capsule-extended__counter";
+  statsCounter.innerHTML = '<span id="stats-completed">0</span> / <span id="stats-total">' + exampleCount + '</span>';
+
+  statsHeader.append(statsLabel, statsCounter);
+
+  const resultsCapsule = document.createElement("div");
+  resultsCapsule.className = "results-capsule";
+
+  const correctSide = document.createElement("div");
+  correctSide.className = "results-capsule__side results-capsule__side--correct";
+  correctSide.innerHTML = `
+    <div class="results-capsule__icon">✓</div>
+    <div class="results-capsule__value" id="stats-correct">0</div>
   `;
 
-  const statCompleted = document.createElement("div");
-  statCompleted.className = "stat-item";
-  statCompleted.innerHTML = `
-    <span class="stat-item__label">${
-      t?.("trainer.stats.completed") || "Решено:"
-    }</span>
-    <span class="stat-item__value" id="stats-completed">0</span>
+  const incorrectSide = document.createElement("div");
+  incorrectSide.className = "results-capsule__side results-capsule__side--incorrect";
+  incorrectSide.innerHTML = `
+    <div class="results-capsule__icon">✗</div>
+    <div class="results-capsule__value" id="stats-incorrect">0</div>
   `;
 
-  const statCorrect = document.createElement("div");
-  statCorrect.className = "stat-item";
-  statCorrect.innerHTML = `
-    <span class="stat-item__label">${
-      t?.("trainer.stats.correct") || "Правильно:"
-    }</span>
-    <span class="stat-item__value stat-item__value--correct" id="stats-correct">0</span>
-  `;
+  resultsCapsule.append(correctSide, incorrectSide);
+  statsCard.append(statsHeader, resultsCapsule);
 
-  const statIncorrect = document.createElement("div");
-  statIncorrect.className = "stat-item";
-  statIncorrect.innerHTML = `
-    <span class="stat-item__label">${
-      t?.("trainer.stats.incorrect") || "Ошибки:"
-    }</span>
-    <span class="stat-item__value stat-item__value--incorrect" id="stats-incorrect">0</span>
-  `;
-
-  statsBody.append(statTotal, statCompleted, statCorrect, statIncorrect);
-  statsCard.append(statsTitle, statsBody);
-
-  // --- Карточка Прогресс
+  // --- Карточка Прогресс (компактная)
   const progressCard = document.createElement("div");
-  progressCard.className = "panel-card panel-card--progress";
+  progressCard.className = "progress-container";
 
   const progressTitle = document.createElement("div");
-  progressTitle.className = "panel-card__title";
+  progressTitle.className = "progress-container__title";
   progressTitle.textContent =
     t?.("trainer.progress.title") || "Прогресс";
 
-  const progressBody = document.createElement("div");
-  progressBody.className = "panel-card__body";
-
-  const progressBar = document.createElement("div");
-  progressBar.className = "progress-bar";
-
-  const correctBar = document.createElement("div");
-  correctBar.className = "progress-bar__correct";
-  correctBar.id = "progress-correct";
-  correctBar.style.width = "0%";
-
-  const incorrectBar = document.createElement("div");
-  incorrectBar.className = "progress-bar__incorrect";
-  incorrectBar.id = "progress-incorrect";
-  incorrectBar.style.width = "0%";
-
-  progressBar.append(correctBar, incorrectBar);
-
-  const labels = document.createElement("div");
-  labels.className = "progress-label";
+  const progressLabels = document.createElement("div");
+  progressLabels.className = "progress-container__labels";
 
   const correctLabel = document.createElement("span");
   correctLabel.className = "progress-label__correct";
-  correctLabel.textContent =
-    t?.("trainer.correctLabel") || "Правильно: ";
-  const correctPercent = document.createElement("strong");
-  correctPercent.id = "percent-correct";
-  correctPercent.textContent = "0%";
-  correctLabel.appendChild(correctPercent);
+  correctLabel.innerHTML = `${t?.("trainer.correctLabel") || "Правильно:"} <strong id="percent-correct">0%</strong>`;
 
   const incorrectLabel = document.createElement("span");
   incorrectLabel.className = "progress-label__incorrect";
-  incorrectLabel.textContent =
-    t?.("trainer.incorrectLabel") || "Ошибки: ";
-  const incorrectPercent = document.createElement("strong");
-  incorrectPercent.id = "percent-incorrect";
-  incorrectPercent.textContent = "0%";
-  incorrectLabel.appendChild(incorrectPercent);
+  incorrectLabel.innerHTML = `${t?.("trainer.incorrectLabel") || "Ошибки:"} <strong id="percent-incorrect">0%</strong>`;
 
-  labels.append(correctLabel, incorrectLabel);
-
-  progressBody.append(progressBar, labels);
-  progressCard.append(progressTitle, progressBody);
+  progressLabels.append(correctLabel, incorrectLabel);
+  progressCard.append(progressTitle, progressLabels);
 
   // --- Карточка Таймер
   const timerCard = document.createElement("div");
