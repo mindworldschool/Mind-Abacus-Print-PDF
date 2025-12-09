@@ -116,7 +116,6 @@ export function openWorksheetPrintWindow(options = {}) {
       align-items: flex-start;
       margin-bottom: 8mm;
       padding-bottom: 4mm;
-      border-bottom: 1px solid #d8c4aa;
     }
 
     .page-header__left {
@@ -238,6 +237,7 @@ export function openWorksheetPrintWindow(options = {}) {
       font-family: "Fira Code", "Consolas", monospace;
       font-size: 9.5pt;
       line-height: 1.25;
+      text-align: center;
     }
 
     .example-card__answer-block {
@@ -247,9 +247,9 @@ export function openWorksheetPrintWindow(options = {}) {
       gap: 1.2mm;
     }
 
-    .answer-line {
-      border-bottom: 1px solid #c0b29c;
+    .answer-cell {
       height: 7mm;
+      background: transparent;
     }
 
     .page-break {
@@ -361,8 +361,8 @@ export function openWorksheetPrintWindow(options = {}) {
           </div>
 
           <div class="example-card__answer-block">
-            <div class="answer-line"></div>
-            <div class="answer-line"></div>
+            <div class="answer-cell"></div>
+            <div class="answer-cell"></div>
           </div>
         </div>
       `);
