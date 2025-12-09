@@ -17,6 +17,7 @@
 
 import { t, getCurrentLanguage } from "../../core/i18n.js";
 import { getCurrentWorksheet } from "./worksheetGenerator.js";
+import { state } from "../../core/state.js";
 
 const EXAMPLES_PER_PAGE = 10;
 
@@ -50,7 +51,8 @@ export function openWorksheetPrintWindow(options = {}) {
   console.log("[worksheetPrintWindow] showAnswers value:", showAnswers);
 
   const language = getCurrentLanguage();
-  const texts = getPrintTexts();
+  const mode = state.settings.mode || "abacus";
+  const texts = getPrintTexts(mode);
 
   // Получаем абсолютный URL для лого
   const logoUrl = new URL("../../assets/logo.png", import.meta.url).href;
@@ -99,10 +101,6 @@ export function openWorksheetPrintWindow(options = {}) {
       page-break-after: always;
       background: white;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-
-      /* Рамка по периметру листа */
-      border: 2px solid #B68E6B;
-      border-radius: 8px;
       padding: 10mm 8mm;
     }
 
@@ -206,8 +204,8 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     .example-card {
-      border: 1px solid #d5c2a3;
-      border-radius: 4px;
+      border: 2px solid #333;
+      border-radius: 6px;
       padding: 3mm 2.5mm;
       min-height: 36mm;
       display: flex;
@@ -445,11 +443,15 @@ export function openWorksheetPrintWindow(options = {}) {
     }, 100);
   }
 }
-function getPrintTexts() {
+function getPrintTexts(mode) {
+  const modeText = mode === "mental"
+    ? t("printSheet.modeMental")
+    : t("printSheet.modeAbacus");
+
   return {
-    title: t("printSheet.title"),
+    title: `${t("printSheet.title")} (${modeText})`,
     subtitle: t("printSheet.subtitle"),
-    answersTitle: t("printSheet.answersTitle"),
+    answersTitle: `${t("printSheet.answersTitle")} (${modeText})`,
     answersSubtitle: t("printSheet.answersSubtitle"),
     metaExamples: t("printSheet.metaExamples"),
     metaGenerated: t("printSheet.metaGenerated"),
