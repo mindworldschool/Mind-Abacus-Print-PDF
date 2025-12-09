@@ -219,16 +219,20 @@ export function openWorksheetPrintWindow(options = {}) {
     .example-card__number {
       font-weight: 600;
       text-align: center;
+      padding-bottom: 2mm;
       margin-bottom: 2mm;
       font-size: 10pt;
+      border-bottom: 1px solid #999;
     }
 
     .example-card__steps {
-      margin: 2mm 0;
+      padding: 2mm 0;
+      margin-bottom: 2mm;
       min-height: 15mm;
       display: flex;
       flex-direction: column;
       gap: 0.8mm;
+      border-bottom: 1px solid #999;
     }
 
     .example-card__step {
@@ -239,15 +243,19 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     .example-card__answer-block {
-      margin-top: 1.5mm;
       display: flex;
       flex-direction: column;
-      gap: 1.2mm;
+      gap: 0;
     }
 
     .answer-cell {
-      height: 7mm;
+      height: 8mm;
       background: transparent;
+      border-bottom: 1px solid #999;
+    }
+
+    .answer-cell:last-child {
+      border-bottom: none;
     }
 
     .page-break {
@@ -255,29 +263,35 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     /* Лист с ответами */
-    .answers-list {
+    .answers-table {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 3mm 4mm;
-      font-size: 10pt;
+      gap: 2mm;
       margin-top: 4mm;
+      font-size: 10pt;
     }
 
-    .answers-item {
-      display: flex;
-      align-items: baseline;
-      gap: 2mm;
+    .answers-cell {
+      border: 1px solid #999;
+      padding: 2mm;
+      text-align: center;
       break-inside: avoid;
       page-break-inside: avoid;
+      display: flex;
+      flex-direction: column;
+      gap: 1mm;
     }
 
-    .answers-item__index {
+    .answers-cell__index {
       font-weight: 600;
+      font-size: 9pt;
+      color: #666;
     }
 
-    .answers-item__value {
+    .answers-cell__value {
       font-family: "Fira Code", "Consolas", monospace;
-      font-size: 10pt;
+      font-size: 11pt;
+      font-weight: 500;
     }
 
     @media print {
@@ -411,20 +425,20 @@ export function openWorksheetPrintWindow(options = {}) {
           </div>
         </div>
 
-        <div class="answers-list">
+        <div class="answers-table">
     `);
 
     examples.forEach((ex) => {
       doc.write(`
-        <div class="answers-item">
-          <span class="answers-item__index">№ ${ex.index}:</span>
-          <span class="answers-item__value">${safeNumber(ex.answer)}</span>
+        <div class="answers-cell">
+          <div class="answers-cell__index">№ ${ex.index}</div>
+          <div class="answers-cell__value">${safeNumber(ex.answer)}</div>
         </div>
       `);
     });
 
     doc.write(`
-        </div> <!-- /answers-list -->
+        </div> <!-- /answers-table -->
       </div> <!-- /page (answers) -->
     `);
   }
