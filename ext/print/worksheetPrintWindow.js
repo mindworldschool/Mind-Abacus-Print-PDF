@@ -44,6 +44,11 @@ export function openWorksheetPrintWindow(options = {}) {
   }
 
   const { examples, showAnswers, createdAt } = worksheet;
+
+  // 🆕 Логирование для отладки
+  console.log("[worksheetPrintWindow] worksheet object:", worksheet);
+  console.log("[worksheetPrintWindow] showAnswers value:", showAnswers);
+
   const language = getCurrentLanguage();
   const texts = getPrintTexts();
   const totalExamples = examples.length;
@@ -407,7 +412,12 @@ export function openWorksheetPrintWindow(options = {}) {
     `);
   });
 
-    if (showAnswers) {
+  // 🆕 Логирование перед генерацией страницы с ответами
+  console.log("[worksheetPrintWindow] Checking showAnswers before rendering answers page:", showAnswers);
+  console.log("[worksheetPrintWindow] Will render answers page:", showAnswers === true);
+
+  if (showAnswers) {
+    console.log("[worksheetPrintWindow] ✅ Rendering answers page");
     doc.write(`
       <div class="page page-break">
         <div class="page-header">

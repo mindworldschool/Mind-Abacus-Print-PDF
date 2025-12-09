@@ -139,7 +139,7 @@ export function renderConfirmation(container, { t, state, navigate }) {
     const showAnswers =
       typeof s.print?.showAnswers === "boolean"
         ? s.print.showAnswers
-        : true;
+        : false;
 
     const worksheet = generateWorksheet({
       examplesCount,

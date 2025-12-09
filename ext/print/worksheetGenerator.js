@@ -35,6 +35,10 @@ import { generateExample } from "../core/generator.js";
 export function generateWorksheet(options = {}) {
   const { examplesCount = 20, showAnswers = false } = options;
 
+  // 🆕 Логирование для отладки
+  console.log("[worksheetGenerator] Received options:", options);
+  console.log("[worksheetGenerator] showAnswers value:", showAnswers);
+
   const fullState = getState();
   const trainerSettings = fullState.settings;
 
