@@ -378,6 +378,10 @@ export function renderSettings(container, { t, state, updateSettings, navigate }
   baseGrid.appendChild(actionsRow.row);
 
   const examplesRow = createFormRow(t("settings.examples.label"));
+
+  // Переменная для синхронизации с полем печати (будет создана позже)
+  let printExamplesInputRef = null;
+
   examplesRow.control.appendChild(
     createCounter({
       count: settingsState.examples.count,
@@ -388,6 +392,11 @@ export function renderSettings(container, { t, state, updateSettings, navigate }
         updateSettings({
           examples: { ...current, count, infinite }
         });
+
+        // 🆕 Синхронизация с полем печати
+        if (printExamplesInputRef && !infinite) {
+          printExamplesInputRef.value = String(count);
+        }
       }
     })
   );
@@ -522,6 +531,10 @@ export function renderSettings(container, { t, state, updateSettings, navigate }
   printExamplesInput.value = String(
     settingsState.examples?.count ?? 20
   );
+
+  // 🆕 Связываем с основным счетчиком для синхронизации
+  printExamplesInputRef = printExamplesInput;
+
   printExamplesRow.control.appendChild(printExamplesInput);
   printGrid.appendChild(printExamplesRow.row);
 
@@ -531,8 +544,16 @@ export function renderSettings(container, { t, state, updateSettings, navigate }
   );
   const printAnswersToggle = createCheckbox(
     "",
-    false,
-    () => {},
+    settingsState.print?.showAnswers ?? false,
+    (checked) => {
+      // 🆕 Сохраняем значение в state
+      updateSettings({
+        print: {
+          ...state.settings.print,
+          showAnswers: checked
+        }
+      });
+    },
     "settings-checkbox settings-checkbox--switch"
   );
   const printAnswersInput = printAnswersToggle.querySelector("input");
@@ -552,6 +573,10 @@ export function renderSettings(container, { t, state, updateSettings, navigate }
       const rawValue = parseInt(printExamplesInput.value, 10);
       const examplesCount = Math.max(1, Number.isFinite(rawValue) ? rawValue : baseCount);
       const showAnswers = !!printAnswersInput?.checked;
+
+      // 🆕 Логирование для отладки
+      console.log("[Print] Generating worksheet with:", { examplesCount, showAnswers });
+      console.log("[Print] printAnswersInput.checked:", printAnswersInput?.checked);
 
       // Генерация листа + открытие окна печати
       generateWorksheet({

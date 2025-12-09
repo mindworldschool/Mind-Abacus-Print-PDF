@@ -66,7 +66,10 @@ const defaultState = {
       }
     },
     transition: "none",
-    inline: false
+    inline: false,
+    print: {
+      showAnswers: false
+    }
   },
   results: {
     success: 0,
