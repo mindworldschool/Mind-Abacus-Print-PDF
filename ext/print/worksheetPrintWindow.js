@@ -82,13 +82,20 @@ export function openWorksheetPrintWindow(options = {}) {
       font-size: 11pt;
       color: #222;
       margin: 0;
-      padding: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
     }
 
     .page {
-      width: 100%;
-      min-height: calc(100vh - 20mm);
+      width: 210mm;
+      min-height: 297mm;
       page-break-after: always;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
       /* Рамка по периметру листа */
       border: 2px solid #B68E6B;
@@ -316,6 +323,15 @@ export function openWorksheetPrintWindow(options = {}) {
 
     @media print {
       body {
+        margin: 0;
+        padding: 0;
+        background: white;
+      }
+
+      .page {
+        width: 100%;
+        min-height: auto;
+        box-shadow: none;
         margin: 0;
       }
     }
