@@ -51,6 +51,9 @@ export function openWorksheetPrintWindow(options = {}) {
 
   const language = getCurrentLanguage();
   const texts = getPrintTexts();
+
+  // Получаем абсолютный URL для лого
+  const logoUrl = new URL("../../assets/logo.png", import.meta.url).href;
   const totalExamples = examples.length;
   const worksheetPages = chunkExamples(examples, EXAMPLES_PER_PAGE);
   const worksheetDate = createdAt ? formatDate(createdAt, language) : "-";
@@ -124,10 +127,13 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     .page-header__logo {
-      font-weight: 700;
-      font-size: 13pt;
-      color: #B68E6B; /* тёплое золото под бренд */
-      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+    }
+
+    .page-header__logo img {
+      height: 40px;
+      width: auto;
     }
 
     .page-header__title {
@@ -347,7 +353,9 @@ export function openWorksheetPrintWindow(options = {}) {
       <div class="page${isFirstPage ? "" : " page-break"}">
         <div class="page-header">
           <div class="page-header__left">
-            <div class="page-header__logo">MindWorld School</div>
+            <div class="page-header__logo">
+              <img src="${logoUrl}" alt="MindWorld School" />
+            </div>
             <div class="page-header__title">
               <span class="page-title-main">${escapeHtml(texts.title)}</span>
               <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
@@ -438,7 +446,9 @@ export function openWorksheetPrintWindow(options = {}) {
       <div class="page page-break">
         <div class="page-header">
           <div class="page-header__left">
-            <div class="page-header__logo">MindWorld School</div>
+            <div class="page-header__logo">
+              <img src="${logoUrl}" alt="MindWorld School" />
+            </div>
             <div class="page-header__title">
                <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
               <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
