@@ -310,117 +310,26 @@ export function openWorksheetPrintWindow(options = {}) {
 `);
 
   // Генерируем таблицы примеров
-  // Определяем, нужен ли page-break между таблицами
-  // Если много строк (больше 16 действий), каждая таблица на отдельной странице
-  const needsPageBreak = actionsCount > 16;
+  // Определяем, сколько таблиц можно разместить на одном листе
+  // Если действий мало (≤ 10), помещаем 2 таблицы на лист, иначе - по 1 таблице
+  const tablesPerPage = actionsCount <= 10 ? 2 : 1;
 
-  // Открываем контейнер страницы и добавляем шапку один раз
-  doc.write(`
-    <div class="page">
-      <div class="page-header">
-        <div class="page-header__left">
-          <div class="page-header__logo">
-            <img src="${logoUrl}" alt="MindWorld School" />
-          </div>
-          <div class="page-header__title">
-            <span class="page-title-main">${escapeHtml(texts.title)}</span>
-            <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
-          </div>
-        </div>
+  // Группируем таблицы по страницам
+  for (let groupIndex = 0; groupIndex < worksheetPages.length; groupIndex += tablesPerPage) {
+    const isFirstGroup = groupIndex === 0;
+    const tablesInGroup = worksheetPages.slice(groupIndex, groupIndex + tablesPerPage);
 
-        <div class="page-header__fields">
-          <div class="field-row">
-            <span class="field-label">${escapeHtml(texts.fieldName)}</span>
-            <span class="field-line"></span>
-          </div>
-          <div class="field-row">
-            <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
-            <span class="field-line"></span>
-          </div>
-        </div>
-      </div>
-  `);
-
-  // Генерируем все таблицы с примерами друг за другом
-  worksheetPages.forEach((pageExamples, pageIndex) => {
-    const startNo = pageIndex * EXAMPLES_PER_TABLE + 1;
-
+    // Открываем контейнер страницы и добавляем шапку
     doc.write(`
-      <table class="examples-table">
-        <thead>
-          <tr>
-            <th class="examples-table__row-header"></th>
-    `);
-
-    // Заголовки столбцов (номера примеров) - всегда 5 столбцов
-    for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
-      const ex = pageExamples[col];
-      if (ex) {
-        doc.write(`<th class="examples-table__col-header">${ex.index}</th>`);
-      } else {
-        doc.write(`<th class="examples-table__col-header"></th>`);
-      }
-    }
-
-    doc.write(`
-          </tr>
-        </thead>
-        <tbody>
-    `);
-
-    // Строки с числами (по количеству действий)
-    for (let row = 0; row < actionsCount; row++) {
-      doc.write(`<tr>`);
-
-      // Номер строки в левой колонке
-      doc.write(`<td class="examples-table__row-no">${row + 1}</td>`);
-
-      // Ячейки с числами для каждого примера - всегда 5 столбцов
-      for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
-        const ex = pageExamples[col];
-        const step = ex && ex.steps && ex.steps[row] ? String(ex.steps[row]) : '';
-        doc.write(`<td class="examples-table__cell">${escapeHtml(step)}</td>`);
-      }
-
-      doc.write(`</tr>`);
-    }
-
-    // Две пустые строки для ответов - всегда 5 столбцов
-    for (let i = 0; i < 2; i++) {
-      doc.write(`<tr>`);
-      doc.write(`<td class="examples-table__row-no"></td>`);
-
-      for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
-        doc.write(`<td class="examples-table__answer-cell"></td>`);
-      }
-
-      doc.write(`</tr>`);
-    }
-
-    doc.write(`
-        </tbody>
-      </table>
-    `);
-  });
-
-  // Закрываем контейнер страницы
-  doc.write(`
-    </div>
-  `);
-
-  // Таблица ответов (если включено)
-  if (showAnswers) {
-    // Открываем контейнер страницы для ответов и добавляем шапку один раз
-    doc.write(`
-      <div class="page page-break">
+      <div class="page${!isFirstGroup ? ' page-break' : ''}">
         <div class="page-header">
           <div class="page-header__left">
             <div class="page-header__logo">
               <img src="${logoUrl}" alt="MindWorld School" />
             </div>
             <div class="page-header__title">
-              <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
-              <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
+              <span class="page-title-main">${escapeHtml(texts.title)}</span>
+              <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
             </div>
           </div>
 
@@ -437,21 +346,22 @@ export function openWorksheetPrintWindow(options = {}) {
         </div>
     `);
 
-    // Генерируем все таблицы с ответами друг за другом
-    worksheetPages.forEach((pageExamples, pageIndex) => {
+    // Генерируем таблицы для этой группы
+    tablesInGroup.forEach((pageExamples) => {
       doc.write(`
-        <table class="answers-table">
+        <table class="examples-table">
           <thead>
             <tr>
+              <th class="examples-table__row-header"></th>
       `);
 
-      // Заголовки с номерами примеров - всегда 5 столбцов
+      // Заголовки столбцов (номера примеров) - всегда 5 столбцов
       for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
         const ex = pageExamples[col];
         if (ex) {
-          doc.write(`<th class="answers-table__col-header">${ex.index}</th>`);
+          doc.write(`<th class="examples-table__col-header">${ex.index}</th>`);
         } else {
-          doc.write(`<th class="answers-table__col-header"></th>`);
+          doc.write(`<th class="examples-table__col-header"></th>`);
         }
       }
 
@@ -459,30 +369,131 @@ export function openWorksheetPrintWindow(options = {}) {
             </tr>
           </thead>
           <tbody>
-            <tr>
       `);
 
-      // Ячейки с ответами - всегда 5 столбцов
-      for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
-        const ex = pageExamples[col];
-        if (ex) {
-          doc.write(`<td class="answers-table__answer-cell">${safeNumber(ex.answer)}</td>`);
-        } else {
-          doc.write(`<td class="answers-table__answer-cell"></td>`);
+      // Строки с числами (по количеству действий)
+      for (let row = 0; row < actionsCount; row++) {
+        doc.write(`<tr>`);
+
+        // Номер строки в левой колонке
+        doc.write(`<td class="examples-table__row-no">${row + 1}</td>`);
+
+        // Ячейки с числами для каждого примера - всегда 5 столбцов
+        for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+          const ex = pageExamples[col];
+          const step = ex && ex.steps && ex.steps[row] ? String(ex.steps[row]) : '';
+          doc.write(`<td class="examples-table__cell">${escapeHtml(step)}</td>`);
         }
+
+        doc.write(`</tr>`);
+      }
+
+      // Две пустые строки для ответов - всегда 5 столбцов
+      for (let i = 0; i < 2; i++) {
+        doc.write(`<tr>`);
+        doc.write(`<td class="examples-table__row-no"></td>`);
+
+        for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+          doc.write(`<td class="examples-table__answer-cell"></td>`);
+        }
+
+        doc.write(`</tr>`);
       }
 
       doc.write(`
-            </tr>
           </tbody>
         </table>
       `);
     });
 
-    // Закрываем контейнер страницы ответов
+    // Закрываем контейнер страницы
     doc.write(`
       </div>
     `);
+  }
+
+  // Таблица ответов (если включено)
+  if (showAnswers) {
+    // Группируем таблицы ответов так же, как и таблицы примеров
+    const answersTablesPerPage = actionsCount <= 10 ? 2 : 1;
+
+    for (let groupIndex = 0; groupIndex < worksheetPages.length; groupIndex += answersTablesPerPage) {
+      const tablesInGroup = worksheetPages.slice(groupIndex, groupIndex + answersTablesPerPage);
+
+      // Открываем контейнер страницы для ответов и добавляем шапку
+      doc.write(`
+        <div class="page page-break">
+          <div class="page-header">
+            <div class="page-header__left">
+              <div class="page-header__logo">
+                <img src="${logoUrl}" alt="MindWorld School" />
+              </div>
+              <div class="page-header__title">
+                <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
+                <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
+              </div>
+            </div>
+
+            <div class="page-header__fields">
+              <div class="field-row">
+                <span class="field-label">${escapeHtml(texts.fieldName)}</span>
+                <span class="field-line"></span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
+                <span class="field-line"></span>
+              </div>
+            </div>
+          </div>
+      `);
+
+      // Генерируем таблицы с ответами для этой группы
+      tablesInGroup.forEach((pageExamples) => {
+        doc.write(`
+          <table class="answers-table">
+            <thead>
+              <tr>
+        `);
+
+        // Заголовки с номерами примеров - всегда 5 столбцов
+        for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+          const ex = pageExamples[col];
+          if (ex) {
+            doc.write(`<th class="answers-table__col-header">${ex.index}</th>`);
+          } else {
+            doc.write(`<th class="answers-table__col-header"></th>`);
+          }
+        }
+
+        doc.write(`
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+        `);
+
+        // Ячейки с ответами - всегда 5 столбцов
+        for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+          const ex = pageExamples[col];
+          if (ex) {
+            doc.write(`<td class="answers-table__answer-cell">${safeNumber(ex.answer)}</td>`);
+          } else {
+            doc.write(`<td class="answers-table__answer-cell"></td>`);
+          }
+        }
+
+        doc.write(`
+              </tr>
+            </tbody>
+          </table>
+        `);
+      });
+
+      // Закрываем контейнер страницы ответов
+      doc.write(`
+        </div>
+      `);
+    }
   }
 
   doc.write(`
