@@ -176,6 +176,7 @@ export function openWorksheetPrintWindow(options = {}) {
       margin-bottom: 5mm;
       font-family: Arial, sans-serif;
       page-break-inside: avoid;
+      table-layout: fixed;
     }
 
     .examples-table th,
@@ -231,6 +232,7 @@ export function openWorksheetPrintWindow(options = {}) {
       margin-bottom: 10mm;
       font-family: Arial, sans-serif;
       page-break-inside: avoid;
+      table-layout: fixed;
     }
 
     .answers-table th,
