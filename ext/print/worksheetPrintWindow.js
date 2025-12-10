@@ -67,7 +67,7 @@ export function openWorksheetPrintWindow(options = {}) {
     /* Параметры страницы для PDF-печати */
     @page {
       size: A4 portrait;
-      margin: 10mm;
+      margin: 0;
     }
 
     * {
@@ -93,7 +93,7 @@ export function openWorksheetPrintWindow(options = {}) {
       width: 210mm;
       background: white;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      padding: 8mm 8mm;
+      padding: 10mm 10mm;
       margin-bottom: 10mm;
     }
 
@@ -269,11 +269,7 @@ export function openWorksheetPrintWindow(options = {}) {
     @media print {
       @page {
         size: A4;
-        margin: 10mm;
-      }
-
-      @page:first {
-        margin-top: 0;
+        margin: 0;
       }
 
       body {
@@ -287,7 +283,7 @@ export function openWorksheetPrintWindow(options = {}) {
         min-height: auto;
         box-shadow: none;
         margin: 0;
-        padding: 0;
+        padding: 10mm 10mm;
       }
 
       .page.page-break {
@@ -354,10 +350,15 @@ export function openWorksheetPrintWindow(options = {}) {
             <th class="examples-table__row-header"></th>
     `);
 
-    // Заголовки столбцов (номера примеров)
-    pageExamples.forEach((ex) => {
-      doc.write(`<th class="examples-table__col-header">${ex.index}</th>`);
-    });
+    // Заголовки столбцов (номера примеров) - всегда 5 столбцов
+    for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+      const ex = pageExamples[col];
+      if (ex) {
+        doc.write(`<th class="examples-table__col-header">${ex.index}</th>`);
+      } else {
+        doc.write(`<th class="examples-table__col-header"></th>`);
+      }
+    }
 
     doc.write(`
           </tr>
@@ -372,23 +373,24 @@ export function openWorksheetPrintWindow(options = {}) {
       // Номер строки в левой колонке
       doc.write(`<td class="examples-table__row-no">${row + 1}</td>`);
 
-      // Ячейки с числами для каждого примера
-      pageExamples.forEach((ex) => {
-        const step = ex.steps && ex.steps[row] ? String(ex.steps[row]) : '';
+      // Ячейки с числами для каждого примера - всегда 5 столбцов
+      for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+        const ex = pageExamples[col];
+        const step = ex && ex.steps && ex.steps[row] ? String(ex.steps[row]) : '';
         doc.write(`<td class="examples-table__cell">${escapeHtml(step)}</td>`);
-      });
+      }
 
       doc.write(`</tr>`);
     }
 
-    // Две пустые строки для ответов
+    // Две пустые строки для ответов - всегда 5 столбцов
     for (let i = 0; i < 2; i++) {
       doc.write(`<tr>`);
       doc.write(`<td class="examples-table__row-no"></td>`);
 
-      pageExamples.forEach(() => {
+      for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
         doc.write(`<td class="examples-table__answer-cell"></td>`);
-      });
+      }
 
       doc.write(`</tr>`);
     }
@@ -441,10 +443,15 @@ export function openWorksheetPrintWindow(options = {}) {
             <tr>
       `);
 
-      // Заголовки с номерами примеров
-      pageExamples.forEach((ex) => {
-        doc.write(`<th class="answers-table__col-header">${ex.index}</th>`);
-      });
+      // Заголовки с номерами примеров - всегда 5 столбцов
+      for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+        const ex = pageExamples[col];
+        if (ex) {
+          doc.write(`<th class="answers-table__col-header">${ex.index}</th>`);
+        } else {
+          doc.write(`<th class="answers-table__col-header"></th>`);
+        }
+      }
 
       doc.write(`
             </tr>
@@ -453,10 +460,15 @@ export function openWorksheetPrintWindow(options = {}) {
             <tr>
       `);
 
-      // Ячейки с ответами
-      pageExamples.forEach((ex) => {
-        doc.write(`<td class="answers-table__answer-cell">${safeNumber(ex.answer)}</td>`);
-      });
+      // Ячейки с ответами - всегда 5 столбцов
+      for (let col = 0; col < EXAMPLES_PER_TABLE; col++) {
+        const ex = pageExamples[col];
+        if (ex) {
+          doc.write(`<td class="answers-table__answer-cell">${safeNumber(ex.answer)}</td>`);
+        } else {
+          doc.write(`<td class="answers-table__answer-cell"></td>`);
+        }
+      }
 
       doc.write(`
             </tr>
