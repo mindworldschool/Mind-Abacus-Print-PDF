@@ -91,15 +91,14 @@ export function openWorksheetPrintWindow(options = {}) {
 
     .page {
       width: 210mm;
-      min-height: 297mm;
-      page-break-after: always;
       background: white;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       padding: 10mm 8mm;
+      margin-bottom: 10mm;
     }
 
-    .page:last-child {
-      page-break-after: auto;
+    .page.page-break {
+      page-break-before: always;
     }
 
     .page-header {
@@ -269,7 +268,7 @@ export function openWorksheetPrintWindow(options = {}) {
 
     @media print {
       @page {
-        margin: 0;
+        margin: 10mm;
       }
 
       body {
@@ -283,6 +282,11 @@ export function openWorksheetPrintWindow(options = {}) {
         min-height: auto;
         box-shadow: none;
         margin: 0;
+        padding: 0;
+      }
+
+      .page.page-break {
+        page-break-before: always;
       }
 
       .examples-table__col-header {
@@ -438,7 +442,6 @@ export function openWorksheetPrintWindow(options = {}) {
           <table class="answers-table">
             <thead>
               <tr>
-                <th class="answers-table__row-header--empty"></th>
       `);
 
       // Заголовки с номерами примеров
@@ -451,7 +454,6 @@ export function openWorksheetPrintWindow(options = {}) {
             </thead>
             <tbody>
               <tr>
-                <td class="answers-table__row-header--empty"></td>
       `);
 
       // Ячейки с ответами
