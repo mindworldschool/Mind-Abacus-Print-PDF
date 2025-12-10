@@ -1,25 +1,22 @@
 // ext/print/worksheetPrintWindow.js
 //
-// Открывает новое окно с разметкой листа примеров для печати.
+// Открывает новое окно с разметкой листа примеров для печати в виде таблицы.
 // Использует данные из ext/print/worksheetGenerator.js → getCurrentWorksheet().
 //
 // Структура на листе:
 //   - шапка с логотипом и полями Name / Date / Group / Level;
-//   - рамка по периметру страницы;
-//   - сетка из 5 колонок с "карточками-примерами";
-//   - в каждой карточке:
-//       1) номер примера,
-//       2) стартовое число,
-//       3) операции столбиком,
-//       4) две строки для ответа;
-//   - при showAnswers = true добавляем вторую страницу с ответами.
-//
+//   - таблица с 6 столбцами + 1 левый столбец для нумерации строк;
+//   - верхняя строка таблицы: номера примеров (1-6) жирным, серый фон;
+//   - левая колонка: нумерация строк (1, 2, 3...) сверху вниз;
+//   - количество строк динамическое, зависит от settings.actions.count;
+//   - 2 пустые строки для ответа;
+//   - отдельная таблица ответов: только номера примеров и одна строка для ответа.
 
 import { t, getCurrentLanguage } from "../../core/i18n.js";
 import { getCurrentWorksheet } from "./worksheetGenerator.js";
 import { state } from "../../core/state.js";
 
-const EXAMPLES_PER_PAGE = 10;
+const EXAMPLES_PER_TABLE = 6; // 6 примеров на таблицу
 
 /**
  * Открыть окно с листом примеров для печати.
@@ -33,22 +30,21 @@ export function openWorksheetPrintWindow(options = {}) {
   const worksheet = getCurrentWorksheet();
 
   if (!worksheet || !Array.isArray(worksheet.examples) || worksheet.examples.length === 0) {
-   alert(t("printSheet.emptyWorksheet"));
+    alert(t("printSheet.emptyWorksheet"));
     return;
   }
 
   const printWindow = window.open("", "_blank");
 
   if (!printWindow) {
-   alert(t("printSheet.popupBlocked"));
+    alert(t("printSheet.popupBlocked"));
     return;
   }
 
-  const { examples, showAnswers, createdAt } = worksheet;
+  const { examples, showAnswers, settings } = worksheet;
 
-  // 🆕 Логирование для отладки
-  console.log("[worksheetPrintWindow] worksheet object:", worksheet);
-  console.log("[worksheetPrintWindow] showAnswers value:", showAnswers);
+  // Получаем количество действий из настроек
+  const actionsCount = getActionsCount(settings);
 
   const language = getCurrentLanguage();
   const mode = state.settings.mode || "abacus";
@@ -57,14 +53,12 @@ export function openWorksheetPrintWindow(options = {}) {
   // Получаем абсолютный URL для лого
   const logoUrl = new URL("../../assets/logo.png", import.meta.url).href;
   const totalExamples = examples.length;
-  const worksheetPages = chunkExamples(examples, EXAMPLES_PER_PAGE);
-  const worksheetDate = createdAt ? formatDate(createdAt, language) : "-";
+  const worksheetPages = chunkExamples(examples, EXAMPLES_PER_TABLE);
 
   const doc = printWindow.document;
 
   // --- Базовый HTML-каркас
   doc.write(`<!DOCTYPE html>
-<html lang="en">
 <html lang="${escapeHtml(language)}">
 <head>
   <meta charset="UTF-8" />
@@ -83,7 +77,7 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: Arial, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 11pt;
       color: #222;
       margin: 0;
@@ -176,122 +170,105 @@ export function openWorksheetPrintWindow(options = {}) {
       height: 5mm;
     }
 
-    .page-header__meta {
-      margin-top: 3mm;
-      font-size: 8pt;
-      color: #777;
-    }
-
-    .meta-row {
-      margin-top: 1mm;
-    }
-
-    .meta-label {
-      font-weight: 600;
-      font-size: 8pt;
-    }
-
-    .meta-value {
-      font-size: 8pt;
-    }
-
-    /* Сетка примеров: фиксированно 5 колонок */
-    .worksheet-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5mm 4mm;
+    /* Таблица примеров */
+    .examples-table {
       width: 100%;
-    }
-
-    .example-card {
-      border: 2px solid #333;
-      border-radius: 6px;
-      padding: 3mm 2.5mm;
-      min-height: 36mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      font-size: 9.5pt;
+      border-collapse: collapse;
+      margin-bottom: 15mm;
+      font-family: Arial, sans-serif;
       page-break-inside: avoid;
-      break-inside: avoid;
     }
 
-    .example-card__number {
+    .examples-table th,
+    .examples-table td {
+      border: 1px solid #333;
+      padding: 8px 6px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* Левый столбец для нумерации строк */
+    .examples-table__row-header {
+      background: #e0e0e0;
       font-weight: 600;
+      width: 30px;
+      min-width: 30px;
+    }
+
+    /* Верхняя строка с номерами примеров */
+    .examples-table__col-header {
+      background: #e0e0e0;
+      font-weight: 700;
+      font-size: 16pt;
+      padding: 10px;
+      min-width: 80px;
+    }
+
+    /* Ячейки с нумерацией строк */
+    .examples-table__row-no {
+      background: #f5f5f5;
+      font-weight: 500;
+      font-size: 12pt;
+      width: 30px;
+      min-width: 30px;
+    }
+
+    /* Ячейки с числами примеров */
+    .examples-table__cell {
+      font-size: 16pt;
+      font-weight: 600;
+      min-height: 40px;
+      padding: 10px 6px;
+      line-height: 1.3;
+    }
+
+    /* Пустые ячейки для ответов */
+    .examples-table__answer-cell {
+      background: white;
+      min-height: 40px;
+      padding: 10px 6px;
+    }
+
+    /* Таблица ответов */
+    .answers-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10mm;
+      font-family: Arial, sans-serif;
+      page-break-inside: avoid;
+    }
+
+    .answers-table th,
+    .answers-table td {
+      border: 1px solid #333;
+      padding: 10px 6px;
       text-align: center;
-      padding-bottom: 2mm;
-      margin-bottom: 2mm;
-      font-size: 10pt;
-      border-bottom: 1px solid #999;
+      vertical-align: middle;
     }
 
-    .example-card__steps {
-      padding: 2mm 0;
-      margin-bottom: 2mm;
-      min-height: 15mm;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8mm;
-      border-bottom: 1px solid #999;
+    .answers-table__col-header {
+      background: #e0e0e0;
+      font-weight: 700;
+      font-size: 16pt;
+      padding: 10px;
     }
 
-    .example-card__step {
-      font-family: "Fira Code", "Consolas", monospace;
-      font-size: 9.5pt;
-      line-height: 1.25;
-      text-align: center;
+    .answers-table__answer-cell {
+      background: white;
+      min-height: 50px;
+      padding: 15px 6px;
+      font-size: 14pt;
+      font-weight: 600;
     }
 
-    .example-card__answer-block {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    .answer-cell {
-      height: 8mm;
-      background: transparent;
-      border-bottom: 1px solid #999;
-    }
-
-    .answer-cell:last-child {
-      border-bottom: none;
+    .answers-table__row-header--empty {
+      background: #e0e0e0;
+      width: 30px;
+      min-width: 30px;
     }
 
     .page-break {
       page-break-before: always;
-    }
-
-    /* Лист с ответами */
-    .answers-table {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 2mm;
-      margin-top: 4mm;
-      font-size: 10pt;
-    }
-
-    .answers-cell {
-      border: 1px solid #999;
-      padding: 2mm;
-      text-align: center;
-      break-inside: avoid;
-      page-break-inside: avoid;
-      display: flex;
-      flex-direction: column;
-      gap: 1mm;
-    }
-
-    .answers-cell__index {
-      font-weight: 600;
-      font-size: 9pt;
-      color: #666;
-    }
-
-    .answers-cell__value {
-      font-family: "Fira Code", "Consolas", monospace;
-      font-size: 11pt;
-      font-weight: 500;
     }
 
     @media print {
@@ -311,14 +288,28 @@ export function openWorksheetPrintWindow(options = {}) {
         box-shadow: none;
         margin: 0;
       }
+
+      .examples-table__col-header {
+        font-size: 14pt;
+      }
+
+      .examples-table__cell {
+        font-size: 14pt;
+      }
+
+      .answers-table__col-header {
+        font-size: 14pt;
+      }
     }
   </style>
 </head>
 <body>
 `);
 
- worksheetPages.forEach((pageExamples, pageIndex) => {
+  // Генерируем таблицы примеров
+  worksheetPages.forEach((pageExamples, pageIndex) => {
     const isFirstPage = pageIndex === 0;
+    const startNo = pageIndex * EXAMPLES_PER_TABLE + 1;
 
     doc.write(`
       <div class="page${isFirstPage ? "" : " page-break"}">
@@ -330,78 +321,6 @@ export function openWorksheetPrintWindow(options = {}) {
             <div class="page-header__title">
               <span class="page-title-main">${escapeHtml(texts.title)}</span>
               <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
-            </div>
-          </div>
-
-       <div class="page-header__fields">
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldName)}</span>
-              <span class="field-line"></span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
-              <span class="field-line"></span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldGroup)}</span>
-              <span class="field-line"></span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldLevel)}</span>
-              <span class="field-line"></span>
-            </div>
-          </div>
-        </div>
-     
-    <div class="worksheet-grid">
-    `);
-
-    pageExamples.forEach((ex) => {
-      const stepsFormatted = (ex.steps || []).map((s) => String(s));
-
-        doc.write(`
-        <div class="example-card">
-          <div class="example-card__number">№ ${ex.index}</div>
-
-          <div class="example-card__steps">
-              ${stepsFormatted
-                .map(
-                  (s) =>
-                    `<span class="example-card__step">${escapeHtml(s)}</span>`
-                )
-                .join("")}
-          </div>
-
-          <div class="example-card__answer-block">
-            <div class="answer-cell"></div>
-            <div class="answer-cell"></div>
-          </div>
-        </div>
-      `);
-    });
-
-    doc.write(`
-        </div> <!-- /worksheet-grid -->
-      </div> <!-- /page (worksheet) -->
-    `);
-  });
-
-  // 🆕 Логирование перед генерацией страницы с ответами
-  console.log("[worksheetPrintWindow] Checking showAnswers before rendering answers page:", showAnswers);
-  console.log("[worksheetPrintWindow] Will render answers page:", showAnswers === true);
-
-  if (showAnswers) {
-    console.log("[worksheetPrintWindow] ✅ Rendering answers page");
-    doc.write(`
-      <div class="page page-break">
-        <div class="page-header">
-          <div class="page-header__left">
-            <div class="page-header__logo">
-              <img src="${logoUrl}" alt="MindWorld School" />
-            </div>
-            <div class="page-header__title">
-               <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
-              <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
             </div>
           </div>
 
@@ -425,22 +344,127 @@ export function openWorksheetPrintWindow(options = {}) {
           </div>
         </div>
 
-        <div class="answers-table">
+        <table class="examples-table">
+          <thead>
+            <tr>
+              <th class="examples-table__row-header"></th>
     `);
 
-    examples.forEach((ex) => {
-      doc.write(`
-        <div class="answers-cell">
-          <div class="answers-cell__index">№ ${ex.index}</div>
-          <div class="answers-cell__value">${safeNumber(ex.answer)}</div>
-        </div>
-      `);
+    // Заголовки столбцов (номера примеров)
+    pageExamples.forEach((ex) => {
+      doc.write(`<th class="examples-table__col-header">${ex.index}</th>`);
     });
 
     doc.write(`
-        </div> <!-- /answers-table -->
-      </div> <!-- /page (answers) -->
+            </tr>
+          </thead>
+          <tbody>
     `);
+
+    // Строки с числами (по количеству действий)
+    for (let row = 0; row < actionsCount; row++) {
+      doc.write(`<tr>`);
+
+      // Номер строки в левой колонке
+      doc.write(`<td class="examples-table__row-no">${row + 1}</td>`);
+
+      // Ячейки с числами для каждого примера
+      pageExamples.forEach((ex) => {
+        const step = ex.steps && ex.steps[row] ? String(ex.steps[row]) : '';
+        doc.write(`<td class="examples-table__cell">${escapeHtml(step)}</td>`);
+      });
+
+      doc.write(`</tr>`);
+    }
+
+    // Две пустые строки для ответов
+    for (let i = 0; i < 2; i++) {
+      doc.write(`<tr>`);
+      doc.write(`<td class="examples-table__row-no"></td>`);
+
+      pageExamples.forEach(() => {
+        doc.write(`<td class="examples-table__answer-cell"></td>`);
+      });
+
+      doc.write(`</tr>`);
+    }
+
+    doc.write(`
+          </tbody>
+        </table>
+      </div>
+    `);
+  });
+
+  // Таблица ответов (если включено)
+  if (showAnswers) {
+    worksheetPages.forEach((pageExamples, pageIndex) => {
+      const isFirstAnswerPage = pageIndex === 0;
+
+      doc.write(`
+        <div class="page page-break">
+          <div class="page-header">
+            <div class="page-header__left">
+              <div class="page-header__logo">
+                <img src="${logoUrl}" alt="MindWorld School" />
+              </div>
+              <div class="page-header__title">
+                <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
+                <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
+              </div>
+            </div>
+
+            <div class="page-header__fields">
+              <div class="field-row">
+                <span class="field-label">${escapeHtml(texts.fieldName)}</span>
+                <span class="field-line"></span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
+                <span class="field-line"></span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">${escapeHtml(texts.fieldGroup)}</span>
+                <span class="field-line"></span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">${escapeHtml(texts.fieldLevel)}</span>
+                <span class="field-line"></span>
+              </div>
+            </div>
+          </div>
+
+          <table class="answers-table">
+            <thead>
+              <tr>
+                <th class="answers-table__row-header--empty"></th>
+      `);
+
+      // Заголовки с номерами примеров
+      pageExamples.forEach((ex) => {
+        doc.write(`<th class="answers-table__col-header">${ex.index}</th>`);
+      });
+
+      doc.write(`
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="answers-table__row-header--empty"></td>
+      `);
+
+      // Ячейки с ответами
+      pageExamples.forEach((ex) => {
+        doc.write(`<td class="answers-table__answer-cell">${safeNumber(ex.answer)}</td>`);
+      });
+
+      doc.write(`
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `);
+    });
   }
 
   doc.write(`
@@ -457,6 +481,17 @@ export function openWorksheetPrintWindow(options = {}) {
     }, 100);
   }
 }
+
+/**
+ * Получить количество действий из настроек
+ */
+function getActionsCount(settings) {
+  if (settings && settings.actions && typeof settings.actions.count === 'number') {
+    return settings.actions.count;
+  }
+  return 5; // По умолчанию 5 действий
+}
+
 function getPrintTexts(mode) {
   const modeText = mode === "mental"
     ? t("printSheet.modeMental")
@@ -467,16 +502,10 @@ function getPrintTexts(mode) {
     subtitle: t("printSheet.subtitle"),
     answersTitle: `${t("printSheet.answersTitle")} (${modeText})`,
     answersSubtitle: t("printSheet.answersSubtitle"),
-    metaExamples: t("printSheet.metaExamples"),
-    metaGenerated: t("printSheet.metaGenerated"),
     fieldName: t("printSheet.fieldName"),
     fieldDate: t("printSheet.fieldDate"),
     fieldGroup: t("printSheet.fieldGroup"),
-    fieldLevel: t("printSheet.fieldLevel"),
-    startLabel: t("printSheet.startLabel"),
-    stepsLabel: t("printSheet.stepsLabel"),
-    answer1Label: t("printSheet.answer1Label"),
-    answer2Label: t("printSheet.answer2Label")
+    fieldLevel: t("printSheet.fieldLevel")
   };
 }
 
@@ -510,27 +539,4 @@ function safeNumber(value) {
   const num = Number(value);
   if (!Number.isFinite(num)) return "-";
   return String(num);
-}
-
-/**
- * Форматируем дату для подписи на листе.
- * Формат: локализованное отображение
- */
-function formatDate(isoString, lang = "en") {
-  try {
-    const d = new Date(isoString);
-    if (Number.isNaN(d.getTime())) return "-";
-
-    const formatter = new Intl.DateTimeFormat(lang, {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-
-     return formatter.format(d).replace(",", "").trim();
-  } catch (e) {
-    return "-";
-  }
 }

@@ -68,13 +68,13 @@ export function generateWorksheet(options = {}) {
 
   const worksheet = {
     examples,
-    settings: trainerSettings,
+    settings: trainerSettings, // Передаем полные настройки для доступа к actions.count
     createdAt: new Date().toISOString(),
     showAnswers: Boolean(showAnswers)
   };
 
   setWorksheet(worksheet);
-  
+
   return worksheet;
 }
 
