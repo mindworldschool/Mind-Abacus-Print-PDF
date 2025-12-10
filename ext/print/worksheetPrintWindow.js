@@ -414,8 +414,9 @@ export function openWorksheetPrintWindow(options = {}) {
 
   // Таблица ответов (если включено)
   if (showAnswers) {
-    // Группируем таблицы ответов так же, как и таблицы примеров
-    const answersTablesPerPage = actionsCount <= 10 ? 2 : 1;
+    // Для ответов стараемся разместить все таблицы на одном листе
+    // Только если таблиц очень много (больше 6), разбиваем на листы по 6 таблиц
+    const answersTablesPerPage = 6;
 
     for (let groupIndex = 0; groupIndex < worksheetPages.length; groupIndex += answersTablesPerPage) {
       const tablesInGroup = worksheetPages.slice(groupIndex, groupIndex + answersTablesPerPage);
