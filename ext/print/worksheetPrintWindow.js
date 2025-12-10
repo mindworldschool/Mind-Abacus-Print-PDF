@@ -311,40 +311,42 @@ export function openWorksheetPrintWindow(options = {}) {
   // Если много строк (больше 16 действий), каждая таблица на отдельной странице
   const needsPageBreak = actionsCount > 16;
 
-  worksheetPages.forEach((pageExamples, pageIndex) => {
-    const isFirstPage = pageIndex === 0;
-    const shouldAddPageBreak = !isFirstPage && needsPageBreak;
-    const startNo = pageIndex * EXAMPLES_PER_TABLE + 1;
-
-    doc.write(`
-      <div class="page${shouldAddPageBreak ? " page-break" : ""}">
-        <div class="page-header">
-          <div class="page-header__left">
-            <div class="page-header__logo">
-              <img src="${logoUrl}" alt="MindWorld School" />
-            </div>
-            <div class="page-header__title">
-              <span class="page-title-main">${escapeHtml(texts.title)}</span>
-              <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
-            </div>
+  // Открываем контейнер страницы и добавляем шапку один раз
+  doc.write(`
+    <div class="page">
+      <div class="page-header">
+        <div class="page-header__left">
+          <div class="page-header__logo">
+            <img src="${logoUrl}" alt="MindWorld School" />
           </div>
-
-          <div class="page-header__fields">
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldName)}</span>
-              <span class="field-line"></span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
-              <span class="field-line"></span>
-            </div>
+          <div class="page-header__title">
+            <span class="page-title-main">${escapeHtml(texts.title)}</span>
+            <span class="page-title-sub">${escapeHtml(texts.subtitle)}</span>
           </div>
         </div>
 
-        <table class="examples-table">
-          <thead>
-            <tr>
-              <th class="examples-table__row-header"></th>
+        <div class="page-header__fields">
+          <div class="field-row">
+            <span class="field-label">${escapeHtml(texts.fieldName)}</span>
+            <span class="field-line"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
+            <span class="field-line"></span>
+          </div>
+        </div>
+      </div>
+  `);
+
+  // Генерируем все таблицы с примерами друг за другом
+  worksheetPages.forEach((pageExamples, pageIndex) => {
+    const startNo = pageIndex * EXAMPLES_PER_TABLE + 1;
+
+    doc.write(`
+      <table class="examples-table">
+        <thead>
+          <tr>
+            <th class="examples-table__row-header"></th>
     `);
 
     // Заголовки столбцов (номера примеров)
@@ -353,9 +355,9 @@ export function openWorksheetPrintWindow(options = {}) {
     });
 
     doc.write(`
-            </tr>
-          </thead>
-          <tbody>
+          </tr>
+        </thead>
+        <tbody>
     `);
 
     // Строки с числами (по количеству действий)
@@ -387,45 +389,51 @@ export function openWorksheetPrintWindow(options = {}) {
     }
 
     doc.write(`
-          </tbody>
-        </table>
-      </div>
+        </tbody>
+      </table>
     `);
   });
 
+  // Закрываем контейнер страницы
+  doc.write(`
+    </div>
+  `);
+
   // Таблица ответов (если включено)
   if (showAnswers) {
-    worksheetPages.forEach((pageExamples, pageIndex) => {
-      const isFirstAnswerPage = pageIndex === 0;
-
-      doc.write(`
-        <div class="page page-break">
-          <div class="page-header">
-            <div class="page-header__left">
-              <div class="page-header__logo">
-                <img src="${logoUrl}" alt="MindWorld School" />
-              </div>
-              <div class="page-header__title">
-                <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
-                <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
-              </div>
+    // Открываем контейнер страницы для ответов и добавляем шапку один раз
+    doc.write(`
+      <div class="page page-break">
+        <div class="page-header">
+          <div class="page-header__left">
+            <div class="page-header__logo">
+              <img src="${logoUrl}" alt="MindWorld School" />
             </div>
-
-            <div class="page-header__fields">
-              <div class="field-row">
-                <span class="field-label">${escapeHtml(texts.fieldName)}</span>
-                <span class="field-line"></span>
-              </div>
-              <div class="field-row">
-                <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
-                <span class="field-line"></span>
-              </div>
+            <div class="page-header__title">
+              <span class="page-title-main">${escapeHtml(texts.answersTitle)}</span>
+              <span class="page-title-sub">${escapeHtml(texts.answersSubtitle)}</span>
             </div>
           </div>
 
-          <table class="answers-table">
-            <thead>
-              <tr>
+          <div class="page-header__fields">
+            <div class="field-row">
+              <span class="field-label">${escapeHtml(texts.fieldName)}</span>
+              <span class="field-line"></span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
+              <span class="field-line"></span>
+            </div>
+          </div>
+        </div>
+    `);
+
+    // Генерируем все таблицы с ответами друг за другом
+    worksheetPages.forEach((pageExamples, pageIndex) => {
+      doc.write(`
+        <table class="answers-table">
+          <thead>
+            <tr>
       `);
 
       // Заголовки с номерами примеров
@@ -434,10 +442,10 @@ export function openWorksheetPrintWindow(options = {}) {
       });
 
       doc.write(`
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
       `);
 
       // Ячейки с ответами
@@ -446,12 +454,16 @@ export function openWorksheetPrintWindow(options = {}) {
       });
 
       doc.write(`
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </tbody>
+        </table>
       `);
     });
+
+    // Закрываем контейнер страницы ответов
+    doc.write(`
+      </div>
+    `);
   }
 
   doc.write(`
