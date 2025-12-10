@@ -174,7 +174,7 @@ export function openWorksheetPrintWindow(options = {}) {
     .examples-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 15mm;
+      margin-bottom: 8mm;
       font-family: Arial, sans-serif;
       page-break-inside: avoid;
     }
@@ -182,9 +182,10 @@ export function openWorksheetPrintWindow(options = {}) {
     .examples-table th,
     .examples-table td {
       border: 1px solid #333;
-      padding: 8px 6px;
+      padding: 6px 4px;
       text-align: center;
       vertical-align: middle;
+      height: 32px;
     }
 
     /* Левый столбец для нумерации строк */
@@ -199,8 +200,7 @@ export function openWorksheetPrintWindow(options = {}) {
     .examples-table__col-header {
       background: #e0e0e0;
       font-weight: 700;
-      font-size: 16pt;
-      padding: 10px;
+      font-size: 13pt;
       min-width: 80px;
     }
 
@@ -208,25 +208,21 @@ export function openWorksheetPrintWindow(options = {}) {
     .examples-table__row-no {
       background: #f5f5f5;
       font-weight: 500;
-      font-size: 12pt;
+      font-size: 10pt;
       width: 30px;
       min-width: 30px;
     }
 
     /* Ячейки с числами примеров */
     .examples-table__cell {
-      font-size: 16pt;
+      font-size: 13pt;
       font-weight: 600;
-      min-height: 40px;
-      padding: 10px 6px;
-      line-height: 1.3;
+      line-height: 1.1;
     }
 
     /* Пустые ячейки для ответов */
     .examples-table__answer-cell {
       background: white;
-      min-height: 40px;
-      padding: 10px 6px;
     }
 
     /* Таблица ответов */
@@ -290,15 +286,15 @@ export function openWorksheetPrintWindow(options = {}) {
       }
 
       .examples-table__col-header {
-        font-size: 14pt;
+        font-size: 12pt;
       }
 
       .examples-table__cell {
-        font-size: 14pt;
+        font-size: 12pt;
       }
 
       .answers-table__col-header {
-        font-size: 14pt;
+        font-size: 12pt;
       }
     }
   </style>
@@ -308,8 +304,8 @@ export function openWorksheetPrintWindow(options = {}) {
 
   // Генерируем таблицы примеров
   // Определяем, нужен ли page-break между таблицами
-  // Если много строк (больше 10 действий), каждая таблица на отдельной странице
-  const needsPageBreak = actionsCount > 10;
+  // Если много строк (больше 16 действий), каждая таблица на отдельной странице
+  const needsPageBreak = actionsCount > 16;
 
   worksheetPages.forEach((pageExamples, pageIndex) => {
     const isFirstPage = pageIndex === 0;
