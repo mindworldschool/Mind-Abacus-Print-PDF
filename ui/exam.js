@@ -68,72 +68,110 @@ function generateExamContent(settings, t) {
   // Exam header (for print)
   const examHeader = document.createElement("div");
   examHeader.className = "exam-print-header";
+
+  const level = settings.level || 7;
+  const timeLimit = settings.timeLimit || 10;
+
   examHeader.innerHTML = `
     <h1>Abacus Certification Exam Questions</h1>
     <div class="exam-info">
       <p><strong>Addition and subtraction (±)</strong></p>
       <div class="exam-meta">
-        <span>Level: ${settings.level || 7}</span>
-        <span>Time: ${settings.timeLimit || 10} min</span>
+        <span>Level: ${level}</span>
+        <span>Time: ${timeLimit} min</span>
         <span class="score-box">Score</span>
       </div>
     </div>
   `;
   content.appendChild(examHeader);
 
-  // Section 1: Straight Calculation
+  // Get number of actions from settings
+  const actionsCount = getActionsCount(settings);
+  const totalExamples = 30; // Total examples to generate
+  const examplesPerTable = 6; // 6 columns
+
+  // Generate all examples
+  const generatorSettings = buildGeneratorSettingsFromSettings(settings);
+  const examples = [];
+  for (let i = 0; i < totalExamples; i++) {
+    const ex = generateExample(generatorSettings);
+    examples.push(ex);
+  }
+
+  // Section 1: Example tables
   const section1Title = document.createElement("div");
   section1Title.className = "exam-section-title";
   section1Title.textContent = "Straight Calculation 100% (Each Q : 10 marks)";
   content.appendChild(section1Title);
 
-  const table1 = generateExamTable(settings, 10, 10, 1);
-  content.appendChild(table1);
+  // Generate example tables (6 examples per table)
+  const numTables = Math.ceil(totalExamples / examplesPerTable);
+  for (let tableIndex = 0; tableIndex < numTables; tableIndex++) {
+    const startExample = tableIndex * examplesPerTable;
+    const endExample = Math.min(startExample + examplesPerTable, totalExamples);
+    const tableExamples = examples.slice(startExample, endExample);
 
-  // Section 2: Multi-row calculation
+    const table = generateExampleTable(tableExamples, actionsCount, startExample + 1);
+    content.appendChild(table);
+  }
+
+  // Section 2: Answer tables
   const section2Title = document.createElement("div");
   section2Title.className = "exam-section-title";
-  section2Title.textContent = "Multi-row calculation 50% (Each Q : 5 marks)";
+  section2Title.textContent = "Answers";
   content.appendChild(section2Title);
 
-  const table2 = generateExamTable(settings, 4, 5, 11);
-  content.appendChild(table2);
+  // Generate answer tables
+  for (let tableIndex = 0; tableIndex < numTables; tableIndex++) {
+    const startExample = tableIndex * examplesPerTable;
+    const endExample = Math.min(startExample + examplesPerTable, totalExamples);
+    const numCols = endExample - startExample;
+
+    const table = generateAnswerTable(numCols, startExample + 1);
+    content.appendChild(table);
+  }
 
   return content;
 }
 
 /**
- * Generate exam table with examples
- * @param {Object} settings - Generator settings
- * @param {number} rows - Number of rows per column
- * @param {number} cols - Number of columns
+ * Get number of actions from settings
+ * @param {Object} settings - Settings object
+ * @returns {number}
+ */
+function getActionsCount(settings) {
+  if (settings.actions && typeof settings.actions.count === 'number') {
+    return settings.actions.count;
+  }
+  return 5; // Default to 5 actions
+}
+
+/**
+ * Generate example table with 6 columns
+ * @param {Array} examples - Array of examples
+ * @param {number} actionsCount - Number of actions (rows) per example
  * @param {number} startNo - Starting question number
  * @returns {HTMLElement}
  */
-function generateExamTable(settings, rows, cols, startNo) {
+function generateExampleTable(examples, actionsCount, startNo) {
   const table = document.createElement("table");
   table.className = "exam-table";
 
-  // Generate examples
-  const generatorSettings = buildGeneratorSettingsFromSettings(settings);
-  const examples = [];
-  for (let i = 0; i < rows * cols; i++) {
-    const ex = generateExample(generatorSettings);
-    examples.push(ex);
-  }
+  const numCols = examples.length;
 
   // Header row with column numbers
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
 
-  const noCell = document.createElement("th");
-  noCell.textContent = "NO.";
-  noCell.className = "exam-table__no";
-  headerRow.appendChild(noCell);
+  // Empty cell for row numbers column
+  const emptyCell = document.createElement("th");
+  emptyCell.className = "exam-table__row-header";
+  headerRow.appendChild(emptyCell);
 
-  for (let col = 0; col < cols; col++) {
+  // Column headers with example numbers
+  for (let col = 0; col < numCols; col++) {
     const th = document.createElement("th");
-    th.textContent = String(col + startNo);
+    th.textContent = String(startNo + col);
     th.className = "exam-table__col-header";
     headerRow.appendChild(th);
   }
@@ -144,32 +182,26 @@ function generateExamTable(settings, rows, cols, startNo) {
   // Body with examples
   const tbody = document.createElement("tbody");
 
-  for (let row = 0; row < rows; row++) {
+  // Rows for each action
+  for (let row = 0; row < actionsCount; row++) {
     const tr = document.createElement("tr");
 
-    // Row number
-    const noCell = document.createElement("td");
-    noCell.textContent = String(row + 1);
-    noCell.className = "exam-table__row-no";
-    tr.appendChild(noCell);
+    // Row number cell
+    const rowNoCell = document.createElement("td");
+    rowNoCell.textContent = String(row + 1);
+    rowNoCell.className = "exam-table__row-no";
+    tr.appendChild(rowNoCell);
 
     // Example cells
-    for (let col = 0; col < cols; col++) {
-      const exampleIndex = col * rows + row;
-      const example = examples[exampleIndex];
-
+    for (let col = 0; col < numCols; col++) {
+      const example = examples[col];
       const td = document.createElement("td");
       td.className = "exam-table__cell";
 
-      if (example && example.steps) {
-        // Display steps vertically (one per line for multi-row)
-        const stepsText = example.steps.map(step => {
-          if (typeof step === 'object' && step.step) return step.step;
-          return String(step);
-        }).join('\n');
-
-        td.textContent = stepsText;
-        td.style.whiteSpace = "pre-line";
+      if (example && example.steps && example.steps[row]) {
+        const step = example.steps[row];
+        const stepText = typeof step === 'object' && step.step ? step.step : String(step);
+        td.textContent = stepText;
       }
 
       tr.appendChild(td);
@@ -178,28 +210,78 @@ function generateExamTable(settings, rows, cols, startNo) {
     tbody.appendChild(tr);
   }
 
-  table.appendChild(tbody);
-
-  // Answer rows
-  const tfoot = document.createElement("tfoot");
+  // Two empty rows for answers
   for (let i = 0; i < 2; i++) {
     const tr = document.createElement("tr");
 
-    const ansCell = document.createElement("td");
-    ansCell.textContent = "Ans";
-    ansCell.className = "exam-table__ans";
-    tr.appendChild(ansCell);
+    // Empty cell for row number
+    const emptyRowCell = document.createElement("td");
+    emptyRowCell.className = "exam-table__row-no exam-table__row-no--empty";
+    tr.appendChild(emptyRowCell);
 
-    for (let col = 0; col < cols; col++) {
+    // Empty answer cells
+    for (let col = 0; col < numCols; col++) {
       const td = document.createElement("td");
       td.className = "exam-table__answer-cell";
       tr.appendChild(td);
     }
 
-    tfoot.appendChild(tr);
+    tbody.appendChild(tr);
   }
 
-  table.appendChild(tfoot);
+  table.appendChild(tbody);
+
+  return table;
+}
+
+/**
+ * Generate answer table
+ * @param {number} numCols - Number of columns
+ * @param {number} startNo - Starting question number
+ * @returns {HTMLElement}
+ */
+function generateAnswerTable(numCols, startNo) {
+  const table = document.createElement("table");
+  table.className = "exam-table exam-table--answers";
+
+  // Header row
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  // Empty cell for first column
+  const emptyCell = document.createElement("th");
+  emptyCell.className = "exam-table__row-header exam-table__row-header--empty";
+  headerRow.appendChild(emptyCell);
+
+  // Column headers with example numbers
+  for (let col = 0; col < numCols; col++) {
+    const th = document.createElement("th");
+    th.textContent = String(startNo + col);
+    th.className = "exam-table__col-header";
+    headerRow.appendChild(th);
+  }
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Body with one answer row
+  const tbody = document.createElement("tbody");
+  const tr = document.createElement("tr");
+
+  // Empty cell for first column (no row numbering)
+  const emptyRowCell = document.createElement("td");
+  emptyRowCell.className = "exam-table__row-header exam-table__row-header--empty";
+  tr.appendChild(emptyRowCell);
+
+  // Answer cells
+  for (let col = 0; col < numCols; col++) {
+    const td = document.createElement("td");
+    td.className = "exam-table__answer-cell";
+    tr.appendChild(td);
+  }
+
+  tbody.appendChild(tr);
+  table.appendChild(tbody);
 
   return table;
 }

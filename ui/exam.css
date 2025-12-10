@@ -3,7 +3,7 @@
 /* ===== Screen view (not printed) ===== */
 .exam-screen {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -84,7 +84,7 @@
 .exam-section-title {
   font-size: 16px;
   font-weight: 600;
-  margin: 25px 0 10px 0;
+  margin: 30px 0 15px 0;
   padding: 5px 0;
   border-bottom: 1px solid #666;
 }
@@ -93,58 +93,77 @@
 .exam-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   font-family: Arial, sans-serif;
 }
 
 .exam-table th,
 .exam-table td {
   border: 1px solid #333;
-  padding: 8px;
+  padding: 8px 6px;
   text-align: center;
   vertical-align: middle;
 }
 
-.exam-table__no {
-  background: #f0f0f0;
-  font-weight: 700;
-  width: 50px;
+/* Row header column (left column for row numbers) */
+.exam-table__row-header {
+  background: #e0e0e0;
+  font-weight: 600;
+  width: 40px;
+  min-width: 40px;
 }
 
+.exam-table__row-header--empty {
+  background: #e0e0e0;
+}
+
+/* Column headers (example numbers 1, 2, 3, etc.) */
 .exam-table__col-header {
-  background: #f0f0f0;
+  background: #e0e0e0;
   font-weight: 700;
+  font-size: 18px;
   padding: 10px;
   min-width: 80px;
 }
 
+/* Row number cells (1, 2, 3, ... in left column) */
 .exam-table__row-no {
-  background: #f0f0f0;
-  font-weight: 600;
-  width: 50px;
-}
-
-.exam-table__cell {
-  font-size: 16px;
+  background: #f5f5f5;
   font-weight: 500;
+  font-size: 14px;
+  width: 40px;
+  min-width: 40px;
+}
+
+.exam-table__row-no--empty {
+  background: #f5f5f5;
+}
+
+/* Example cells (numbers like +34, -51, etc.) */
+.exam-table__cell {
+  font-size: 18px;
+  font-weight: 600;
   min-height: 40px;
-  padding: 6px;
+  padding: 10px 6px;
   line-height: 1.3;
+  font-family: 'Baloo 2', Arial, sans-serif;
 }
 
-.exam-table__ans {
-  background: #f0f0f0;
-  font-weight: 700;
-  width: 50px;
-}
-
+/* Empty answer cells */
 .exam-table__answer-cell {
   background: white;
-  min-height: 35px;
+  min-height: 40px;
+  padding: 12px 6px;
 }
 
-.exam-table tfoot tr:first-child td {
-  border-top: 2px solid #333;
+/* Answer table specific styles */
+.exam-table--answers {
+  margin-bottom: 30px;
+}
+
+.exam-table--answers .exam-table__answer-cell {
+  min-height: 50px;
+  padding: 15px 6px;
 }
 
 /* ===== Print styles ===== */
@@ -168,29 +187,37 @@
   .exam-content {
     box-shadow: none;
     border-radius: 0;
-    padding: 15mm;
+    padding: 10mm;
   }
 
   .exam-print-header h1 {
-    font-size: 24pt;
+    font-size: 22pt;
   }
 
   .exam-table {
     page-break-inside: avoid;
+    margin-bottom: 15px;
+  }
+
+  .exam-table__col-header {
+    font-size: 14pt;
+    padding: 6px;
   }
 
   .exam-table__cell {
-    font-size: 12pt;
+    font-size: 14pt;
+    padding: 6px 4px;
+  }
+
+  .exam-section-title {
+    page-break-after: avoid;
+    margin-top: 20px;
   }
 
   /* Ensure proper page breaks */
-  .exam-section-title {
-    page-break-after: avoid;
-  }
-
   @page {
     size: A4;
-    margin: 15mm;
+    margin: 12mm;
   }
 }
 
@@ -214,12 +241,38 @@
     font-size: 12px;
   }
 
-  .exam-table__cell {
-    font-size: 13px;
-    padding: 4px;
+  .exam-table__col-header {
+    font-size: 14px;
+    padding: 6px 4px;
+    min-width: 60px;
   }
 
+  .exam-table__cell {
+    font-size: 14px;
+    padding: 6px 4px;
+  }
+
+  .exam-table__row-no {
+    font-size: 12px;
+    width: 30px;
+    min-width: 30px;
+  }
+
+  .exam-table__row-header {
+    width: 30px;
+    min-width: 30px;
+  }
+}
+
+@media (max-width: 480px) {
   .exam-table__col-header {
-    min-width: 60px;
+    font-size: 12px;
+    padding: 4px 2px;
+    min-width: 50px;
+  }
+
+  .exam-table__cell {
+    font-size: 12px;
+    padding: 4px 2px;
   }
 }
