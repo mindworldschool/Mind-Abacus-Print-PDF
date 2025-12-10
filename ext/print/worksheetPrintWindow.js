@@ -93,7 +93,7 @@ export function openWorksheetPrintWindow(options = {}) {
       width: 210mm;
       background: white;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      padding: 10mm 8mm;
+      padding: 8mm 8mm;
       margin-bottom: 10mm;
     }
 
@@ -105,8 +105,8 @@ export function openWorksheetPrintWindow(options = {}) {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8mm;
-      padding-bottom: 4mm;
+      margin-bottom: 4mm;
+      padding-bottom: 2mm;
     }
 
     .page-header__left {
@@ -173,7 +173,7 @@ export function openWorksheetPrintWindow(options = {}) {
     .examples-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 8mm;
+      margin-bottom: 5mm;
       font-family: Arial, sans-serif;
       page-break-inside: avoid;
     }
@@ -338,14 +338,6 @@ export function openWorksheetPrintWindow(options = {}) {
               <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
               <span class="field-line"></span>
             </div>
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldGroup)}</span>
-              <span class="field-line"></span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">${escapeHtml(texts.fieldLevel)}</span>
-              <span class="field-line"></span>
-            </div>
           </div>
         </div>
 
@@ -426,14 +418,6 @@ export function openWorksheetPrintWindow(options = {}) {
               </div>
               <div class="field-row">
                 <span class="field-label">${escapeHtml(texts.fieldDate)}</span>
-                <span class="field-line"></span>
-              </div>
-              <div class="field-row">
-                <span class="field-label">${escapeHtml(texts.fieldGroup)}</span>
-                <span class="field-line"></span>
-              </div>
-              <div class="field-row">
-                <span class="field-label">${escapeHtml(texts.fieldLevel)}</span>
                 <span class="field-line"></span>
               </div>
             </div>
