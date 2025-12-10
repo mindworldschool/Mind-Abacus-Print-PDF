@@ -62,7 +62,7 @@ export function openWorksheetPrintWindow(options = {}) {
 <html lang="${escapeHtml(language)}">
 <head>
   <meta charset="UTF-8" />
-  <title>${escapeHtml(texts.title)}</title>
+  <title> </title>
   <style>
     /* Параметры страницы для PDF-печати */
     @page {
@@ -268,7 +268,12 @@ export function openWorksheetPrintWindow(options = {}) {
 
     @media print {
       @page {
+        size: A4;
         margin: 10mm;
+      }
+
+      @page:first {
+        margin-top: 0;
       }
 
       body {
