@@ -452,6 +452,10 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.abacus-wrapper > * {
+  position: relative;
+}
+
 .abacus-wrapper.visible {
   display: block;
   animation: slideInFromBottom 0.4s ease-out;
@@ -490,24 +494,30 @@
 }
 
 .abacus-close-btn {
-  background: transparent;
-  border: none;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(192, 166, 127, 0.3);
   font-size: 28px;
   line-height: 1;
   cursor: pointer;
   color: var(--color-muted);
   padding: 0;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   transition: var(--transition);
+  z-index: 1001;
+  pointer-events: auto;
 }
 
 .abacus-close-btn:hover {
-  background: rgba(192, 166, 127, 0.3);
+  background: rgba(192, 166, 127, 0.5);
+  border-color: var(--color-muted);
   transform: scale(1.1);
 }
 
@@ -516,12 +526,14 @@
 }
 
 /* Внутренний контейнер для SVG */
-#floating-abacus-container {
+#floating-abacus-container,
+.abacus-container {
   display: flex;
   justify-content: center;
   align-items: center;
   user-select: none;
   -webkit-user-select: none;
+  position: relative;
 }
 
 /* SVG элемент абакуса */

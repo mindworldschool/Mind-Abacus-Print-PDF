@@ -49,7 +49,12 @@ function createTrainerLayout(displayMode, exampleCount, t) {
   exampleArea.className = "example-view";
   trainerMain.appendChild(exampleArea);
 
-  // Блок ответа прямо под примером
+  // ПРАВАЯ ПАНЕЛЬ
+  const panelControls = document.createElement("div");
+  panelControls.id = "panel-controls";
+  panelControls.className = "panel-controls";
+
+  // Блок ответа в правой панели (первым элементом)
   const answerSection = document.createElement("div");
   answerSection.className = "answer-section-panel";
 
@@ -69,12 +74,6 @@ function createTrainerLayout(displayMode, exampleCount, t) {
     t?.("trainer.submitButton") || "Ответить";
 
   answerSection.append(answerLabel, answerInput, submitBtn);
-  trainerMain.appendChild(answerSection);
-
-  // ПРАВАЯ ПАНЕЛЬ
-  const panelControls = document.createElement("div");
-  panelControls.id = "panel-controls";
-  panelControls.className = "panel-controls";
 
   // --- Карточка Статистика (results-capsule-extended)
   const statsCard = document.createElement("div");
@@ -188,6 +187,7 @@ function createTrainerLayout(displayMode, exampleCount, t) {
 
   // Собираем правую панель
   panelControls.append(
+    answerSection,
     statsCard,
     progressCard,
     timerCard,
@@ -208,20 +208,18 @@ function createAbacusWrapper() {
   wrapper.id = "abacus-wrapper";
   wrapper.className = "abacus-wrapper";
 
-  const inner = document.createElement("div");
-  inner.className = "abacus-wrapper__inner";
-
   const closeBtn = document.createElement("button");
   closeBtn.id = "abacus-close";
-  closeBtn.className = "abacus-wrapper__close";
+  closeBtn.className = "abacus-close-btn";
   closeBtn.innerHTML = "&times;";
+  closeBtn.setAttribute("aria-label", "Close abacus");
+  closeBtn.type = "button";
 
   const abacusContainer = document.createElement("div");
   abacusContainer.id = "floating-abacus-container";
-  abacusContainer.className = "abacus-wrapper__abacus";
+  abacusContainer.className = "abacus-container";
 
-  inner.append(closeBtn, abacusContainer);
-  wrapper.appendChild(inner);
+  wrapper.append(closeBtn, abacusContainer);
 
   return wrapper;
 }
