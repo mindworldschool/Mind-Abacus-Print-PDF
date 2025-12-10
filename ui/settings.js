@@ -588,17 +588,7 @@ export function renderSettings(container, { t, state, updateSettings, navigate }
     }
   });
 
-  // Кнопка "Экзаменационный лист"
-  const examButton = createButton({
-    label: t("settings.exam.button") || "📋 Экзаменационный лист",
-    onClick: () => {
-      navigate("exam");
-    },
-    secondary: true
-  });
-
   printActions.appendChild(printButton);
-  printActions.appendChild(examButton);
   printSection.appendChild(printActions);
 
   form.appendChild(printSection);

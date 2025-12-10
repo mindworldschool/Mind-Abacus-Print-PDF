@@ -5,8 +5,8 @@
 //
 // Структура на листе:
 //   - шапка с логотипом и полями Name / Date / Group / Level;
-//   - таблица с 6 столбцами + 1 левый столбец для нумерации строк;
-//   - верхняя строка таблицы: номера примеров (1-6) жирным, серый фон;
+//   - таблица с 5 столбцами + 1 левый столбец для нумерации строк;
+//   - верхняя строка таблицы: номера примеров (1-5) жирным, серый фон;
 //   - левая колонка: нумерация строк (1, 2, 3...) сверху вниз;
 //   - количество строк динамическое, зависит от settings.actions.count;
 //   - 2 пустые строки для ответа;
@@ -16,7 +16,7 @@ import { t, getCurrentLanguage } from "../../core/i18n.js";
 import { getCurrentWorksheet } from "./worksheetGenerator.js";
 import { state } from "../../core/state.js";
 
-const EXAMPLES_PER_TABLE = 6; // 6 примеров на таблицу
+const EXAMPLES_PER_TABLE = 5; // 5 примеров на таблицу
 
 /**
  * Открыть окно с листом примеров для печати.
@@ -307,12 +307,17 @@ export function openWorksheetPrintWindow(options = {}) {
 `);
 
   // Генерируем таблицы примеров
+  // Определяем, нужен ли page-break между таблицами
+  // Если много строк (больше 10 действий), каждая таблица на отдельной странице
+  const needsPageBreak = actionsCount > 10;
+
   worksheetPages.forEach((pageExamples, pageIndex) => {
     const isFirstPage = pageIndex === 0;
+    const shouldAddPageBreak = !isFirstPage && needsPageBreak;
     const startNo = pageIndex * EXAMPLES_PER_TABLE + 1;
 
     doc.write(`
-      <div class="page${isFirstPage ? "" : " page-break"}">
+      <div class="page${shouldAddPageBreak ? " page-break" : ""}">
         <div class="page-header">
           <div class="page-header__left">
             <div class="page-header__logo">
