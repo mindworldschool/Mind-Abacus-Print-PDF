@@ -43,7 +43,15 @@
     "roundsHint": "10 ejemplos por ronda son un buen calentamiento.",
     "dictationLabel": "Activar dictado de voz",
     "dictationHint": "Lee los números en voz alta durante la sesión.",
-    "submit": "Continuar"
+    "submit": "Continuar",
+    "exam": {
+      "button": "📋 Hoja de Examen"
+    }
+  },
+  "exam": {
+    "title": "Hoja de Examen",
+    "print": "🖨️ Imprimir",
+    "back": "← Atrás"
   },
   "confirmation": {
     "title": "Revisa la configuración",

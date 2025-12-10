@@ -43,7 +43,15 @@
     "roundsHint": "10 examples per session is a good warm-up.",
     "dictationLabel": "Enable voice dictation",
     "dictationHint": "Plays numbers aloud during the run.",
-    "submit": "Continue"
+    "submit": "Continue",
+    "exam": {
+      "button": "📋 Exam Sheet"
+    }
+  },
+  "exam": {
+    "title": "Exam Sheet",
+    "print": "🖨️ Print",
+    "back": "← Back"
   },
   "confirmation": {
     "title": "Review your setup",

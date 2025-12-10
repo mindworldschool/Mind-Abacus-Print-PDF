@@ -16,6 +16,7 @@ import { renderSettings } from "./ui/settings.js";
 import { renderConfirmation } from "./ui/confirmation.js";
 import { renderGame } from "./ui/game.js";
 import { renderResults } from "./ui/results.js";
+import { renderExamSheet } from "./ui/exam.js";
 import { logger } from "./core/utils/logger.js";
 import toast from "./ui/components/Toast.js";
 
@@ -31,7 +32,8 @@ const screens = {
   settings: renderSettings,
   confirmation: renderConfirmation,
   game: renderGame,
-  results: renderResults
+  results: renderResults,
+  exam: renderExamSheet
 };
 
 let currentCleanup = null;
